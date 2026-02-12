@@ -1,0 +1,274 @@
+<div class="card-modal-container">
+  <div class="modal-header">
+    <div class="title-section">
+      <i-feather name="trello"></i-feather>
+      <h2 *ngIf="!editingTitle" (click)="editingTitle = true">{{ card?.title }}</h2>
+      <input *ngIf="editingTitle" type="text" [(ngModel)]="card.title" (blur)="saveTitle()" (keyup.enter)="saveTitle()"
+        autofocus>
+    </div>
+    <button class="btn-close" (click)="close()">
+      <i-feather name="x"></i-feather>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="main-content">
+      <!-- Description Section -->
+      <div class="section description-section">
+        <div class="section-header">
+          <i-feather name="align-left"></i-feather>
+          <h3>{{ 'DESCRIPTION' | translate }}</h3>
+        </div>
+        <div class="section-body">
+          <div *ngIf="!editingDescription" class="description-editor" (click)="editingDescription = true">
+            <div [innerHTML]="card?.description || ('ADD_DETAILED_DESCRIPTION' | translate)"></div>
+          </div>
+          <div *ngIf="editingDescription">
+            <ckeditor [editor]="editor" [(ngModel)]="card.description"></ckeditor>
+            <div class="mt-2">
+              <button mat-raised-button color="primary" (click)="saveDescription()">{{ 'SAVE' | translate }}</button>
+              <button mat-button (click)="editingDescription = false">{{ 'CANCEL' | translate }}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checklists Section -->
+      <div class="section checklist-section" *ngFor="let checklist of card.checklists">
+        <div class="section-header">
+          <i-feather name="check-square"></i-feather>
+          <h3>{{ checklist.name }}</h3>
+          <button class="btn-delete-section" (click)="deleteChecklist(checklist.id)">{{ 'DELETE' | translate }}</button>
+        </div>
+        <div class="section-body">
+          <div class="progress-bar-container mb-3">
+            <span class="progress-text">{{ getChecklistProgress(checklist) }}%</span>
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" [style.width.%]="getChecklistProgress(checklist)"></div>
+            </div>
+          </div>
+          <div class="checklist-items">
+            <div class="checklist-item" *ngFor="let item of checklist.items">
+              <input type="checkbox" [checked]="item.isCompleted" (change)="toggleChecklistItem(item)">
+              <span [class.completed]="item.isCompleted">{{ item.name }}</span>
+              <button class="btn-delete-item" (click)="deleteChecklistItem(checklist, item.id)">
+                <i-feather name="trash-2"></i-feather>
+              </button>
+            </div>
+          </div>
+          <div class="add-item-container mt-2">
+            <input #newItemInput type="text" class="form-control" [placeholder]="'ADD_ITEM' | translate"
+              (keyup.enter)="addChecklistItem(checklist, newItemInput)">
+            <button mat-button color="primary" (click)="addChecklistItem(checklist, newItemInput)">{{ 'ADD' | translate
+              }}</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attachments Section -->
+      <div class="section attachments-section" *ngIf="card.attachments?.length">
+        <div class="section-header">
+          <i-feather name="paperclip"></i-feather>
+          <h3>{{ 'ATTACHMENTS' | translate }}</h3>
+        </div>
+        <div class="section-body">
+          <div class="attachments-list">
+            <div class="attachment-item" *ngFor="let attachment of card.attachments">
+              <div class="attachment-thumbnail">
+                <i-feather name="file-text"></i-feather>
+              </div>
+              <div class="attachment-info">
+                <span class="attachment-name">{{ attachment.name }}</span>
+                <div class="attachment-actions">
+                  <span class="time">{{ attachment.pivot.createdDate | date:'short' }}</span>
+                  <span class="separator">·</span>
+                  <a href="javascript:void(0)" (click)="viewAttachment(attachment)">{{ 'VIEW' | translate }}</a>
+                  <span class="separator">·</span>
+                  <a href="javascript:void(0)" (click)="detachAttachment(attachment.id)">{{ 'DELETE' | translate }}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity Section -->
+      <div class="section activity-thread">
+        <div class="section-header">
+          <i-feather name="activity"></i-feather>
+          <h3>{{ 'ACTIVITY' | translate }}</h3>
+        </div>
+        <div class="section-body">
+          <div class="comment-input mb-4">
+            <ckeditor [editor]="editor" [(ngModel)]="newComment" [config]="{ 
+                toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'insertTable', 'mediaEmbed', 'undo', 'redo' ]
+              }"></ckeditor>
+            <button class="mt-2" mat-raised-button color="primary" [disabled]="!newComment" (click)="addComment()">{{
+              'COMMENT'
+              | translate }}</button>
+          </div>
+
+          <div class="thread-container">
+            <div class="activity-item" *ngFor="let activity of activities">
+              <div class="avatar"></div>
+              <div class="content">
+                <div class="meta">
+                  <span class="user-name">{{ activity.userName }}</span>
+                  <span class="time">{{ activity.createdDate | date:'short' }}</span>
+                </div>
+                <div class="body" [innerHTML]="activity.content"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-actions">
+      <!-- Labels Display -->
+      <div class="action-group">
+        <h4>{{ 'PROCESS_LABELS' | translate }}</h4>
+        <div class="labels-list">
+          <div *ngFor="let label of card.labels" class="label-badge" [style.background-color]="label.color"
+            [title]="label.name" (click)="removeLabel(label.id)">
+            {{ label.name }}
+          </div>
+          <button class="btn-add-badge" (click)="showLabelPicker = !showLabelPicker">
+            <i-feather name="plus"></i-feather>
+          </button>
+        </div>
+        <div class="label-picker" *ngIf="showLabelPicker">
+          <div class="picker-header">
+            <span>{{ 'LABELS' | translate }}</span>
+            <button (click)="showLabelPicker = false">x</button>
+          </div>
+          <div class="labels-options">
+            <div *ngFor="let label of boardLabels" class="label-option" [style.background-color]="label.color"
+              (click)="toggleLabel(label.id)">
+              {{ label.name }}
+              <i-feather name="check" *ngIf="hasLabel(label.id)"></i-feather>
+            </div>
+          </div>
+          <button class="btn-manage-labels" (click)="manageBoardLabels()">{{ 'MANAGE_LABELS' | translate }}</button>
+        </div>
+      </div>
+
+      <!-- Milestone Selection -->
+      <div class="action-group">
+        <h4>{{ 'MILESTONE' | translate }}</h4>
+        <div class="milestones-selection-list">
+          <div *ngFor="let milestone of boardMilestones" class="milestone-checkbox">
+            <input type="checkbox" [checked]="hasMilestone(milestone.id)" (change)="toggleMilestone(milestone.id)">
+            <span class="milestone-color-dot" [style.background-color]="milestone.color"></span>
+            <span class="milestone-name">{{ milestone.name }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Done Status -->
+      <div class="action-group">
+        <label class="done-status-label">
+          <input type="checkbox" [checked]="card.isCompleted" (change)="toggleCompleted()">
+          <span>{{ 'MARK_AS_DONE' | translate }}</span>
+        </label>
+      </div>
+
+      <!-- Due Date -->
+      <div class="action-group">
+        <h4>{{ 'DUE_DATE' | translate }}</h4>
+        <input type="datetime-local" class="form-control" [ngModel]="card.dueDate | date:'yyyy-MM-ddTHH:mm'"
+          (change)="updateDueDate($event)">
+      </div>
+
+      <!-- Priority -->
+      <div class="action-group">
+        <h4>{{ 'PRIORITY' | translate }}</h4>
+        <select class="form-control" [(ngModel)]="card.priority" (change)="updatePriority(card.priority)">
+          <option value="low">{{ 'LOW' | translate }}</option>
+          <option value="medium">{{ 'MEDIUM' | translate }}</option>
+          <option value="high">{{ 'HIGH' | translate }}</option>
+          <option value="urgent">{{ 'URGENT' | translate }}</option>
+        </select>
+      </div>
+
+      <!-- Roles / Assignments -->
+      <div class="action-group">
+        <h4>{{ 'ROLES' | translate }}</h4>
+        <div class="role-selection">
+          <div class="role-item">
+            <label>{{ 'EXECUTOR' | translate }}</label>
+            <select class="form-control" [(ngModel)]="card.executorId"
+              (change)="assignUser('executor', card.executorId)">
+              <option [value]="null">{{ 'UNASSIGNED' | translate }}</option>
+              <option *ngFor="let user of users" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+            </select>
+          </div>
+          <div class="role-item">
+            <label>{{ 'APPROVER' | translate }}</label>
+            <select class="form-control" [(ngModel)]="card.approverId"
+              (change)="assignUser('approver', card.approverId)">
+              <option [value]="null">{{ 'UNASSIGNED' | translate }}</option>
+              <option *ngFor="let user of users" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+            </select>
+          </div>
+          <div class="role-item">
+            <label>{{ 'SUPERVISOR' | translate }}</label>
+            <select class="form-control" [(ngModel)]="card.supervisorId"
+              (change)="assignUser('supervisor', card.supervisorId)">
+              <option [value]="null">{{ 'UNASSIGNED' | translate }}</option>
+              <option *ngFor="let user of users" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-group">
+        <h4>{{ 'ACTIONS' | translate }}</h4>
+        <div class="action-buttons">
+          <button (click)="addAttachment()">
+            <i-feather name="paperclip"></i-feather> {{ 'ATTACHMENT' | translate }}
+          </button>
+          <button (click)="addChecklist()">
+            <i-feather name="check-square"></i-feather> {{ 'CHECKLIST' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Tags Section -->
+      <div class="action-group">
+        <h4>{{ 'TAGS' | translate }}</h4>
+        <div class="tags-list mb-2" *ngIf="card.tags?.length">
+          <div *ngFor="let tag of card.tags" class="tag-badge" (click)="removeTag(tag.id)">
+            {{ tag.name }}
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button (click)="showTagPicker = !showTagPicker">
+            <i-feather name="tag"></i-feather> {{ 'ADD_TAG' | translate }}
+          </button>
+          <div class="tag-picker" *ngIf="showTagPicker">
+            <div class="tag-option" *ngFor="let tag of boardTags" (click)="addTag(tag.id)">
+              {{ tag.name }}
+            </div>
+            <div *ngIf="!boardTags.length" class="no-tags">{{ 'NO_TAGS_AVAILABLE' | translate }}</div>
+            <div class="picker-footer mt-2" style="border-top: 1px solid #ddd; padding-top: 8px;">
+              <button mat-button color="primary" class="w-100" (click)="createNewBoardTag()">
+                <i-feather name="plus" style="width: 14px; height: 14px;"></i-feather> {{ 'CREATE_TAG' | translate }}
+              </button>
+            </div>
+          </div>
+          <button *ngIf="!card.isArchived" (click)="archiveCard()">
+            <i-feather name="archive"></i-feather> {{ 'ARCHIVE' | translate }}
+          </button>
+          <button *ngIf="card.isArchived" (click)="restoreCard()" class="restore-btn">
+            <i-feather name="rotate-ccw"></i-feather> {{ 'RESTORE' | translate }}
+          </button>
+          <button (click)="deleteCard()" class="delete-btn">
+            <i-feather name="trash-2"></i-feather> {{ 'DELETE_CARD' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
