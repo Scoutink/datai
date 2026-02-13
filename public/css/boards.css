@@ -1,0 +1,1058 @@
+/**
+ * Datai Boards - Premium Kanban UI Styles
+ * Modern, dark-mode ready styling
+ */
+
+/* ============================================
+   CSS Variables & Theme
+   ============================================ */
+:root {
+    --boards-primary: #6366f1;
+    --boards-primary-hover: #4f46e5;
+    --boards-secondary: #8b5cf6;
+    --boards-success: #22c55e;
+    --boards-warning: #f59e0b;
+    --boards-danger: #ef4444;
+    --boards-info: #3b82f6;
+
+    --boards-bg: #f8fafc;
+    --boards-surface: #ffffff;
+    --boards-surface-hover: #f1f5f9;
+    --boards-border: #e2e8f0;
+    --boards-text: #1e293b;
+    --boards-text-secondary: #64748b;
+    --boards-text-muted: #94a3b8;
+
+    --boards-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --boards-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --boards-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+    --boards-radius: 12px;
+    --boards-radius-sm: 8px;
+    --boards-transition: all 0.2s ease;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+.boards-app {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--boards-bg);
+    color: var(--boards-text);
+    min-height: 100vh;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+}
+
+/* ============================================
+   Navbar
+   ============================================ */
+.boards-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: var(--boards-surface);
+    border-bottom: 1px solid var(--boards-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.boards-navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.boards-logo {
+    height: 36px;
+    width: auto;
+    border-radius: 8px;
+}
+
+.boards-brand-text {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.brand-primary {
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--boards-text);
+}
+
+.brand-secondary {
+    font-weight: 500;
+    color: var(--boards-primary);
+    padding: 0.125rem 0.5rem;
+    background: linear-gradient(135deg, var(--boards-primary), var(--boards-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.boards-navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.boards-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: var(--boards-radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: var(--boards-transition);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.boards-btn-primary {
+    background: linear-gradient(135deg, var(--boards-primary), var(--boards-secondary));
+    color: white;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.boards-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.boards-btn-outline {
+    background: transparent;
+    color: var(--boards-text);
+    border: 1px solid var(--boards-border);
+}
+
+.boards-btn-outline:hover {
+    background: var(--boards-surface-hover);
+    border-color: var(--boards-primary);
+    color: var(--boards-primary);
+}
+
+.boards-btn-ghost {
+    background: transparent;
+    color: var(--boards-text-secondary);
+}
+
+.boards-btn-ghost:hover {
+    background: var(--boards-surface-hover);
+    color: var(--boards-text);
+}
+
+.boards-btn-block {
+    width: 100%;
+}
+
+/* ============================================
+   Dropdowns
+   ============================================ */
+.boards-dropdown {
+    position: relative;
+}
+
+.boards-dropdown-toggle::after {
+    content: '';
+    border: solid currentColor;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 2px;
+    transform: rotate(45deg);
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+.boards-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 200px;
+    background: var(--boards-surface);
+    border: 1px solid var(--boards-border);
+    border-radius: var(--boards-radius);
+    box-shadow: var(--boards-shadow-lg);
+    padding: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: var(--boards-transition);
+    z-index: 200;
+}
+
+.boards-dropdown:hover .boards-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.boards-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    color: var(--boards-text);
+    text-decoration: none;
+    border-radius: var(--boards-radius-sm);
+    transition: var(--boards-transition);
+}
+
+.boards-dropdown-item:hover {
+    background: var(--boards-surface-hover);
+}
+
+.boards-dropdown-item.active {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--boards-primary);
+}
+
+.boards-dropdown-divider {
+    height: 1px;
+    background: var(--boards-border);
+    margin: 0.5rem 0;
+}
+
+.boards-dropdown-header {
+    padding: 0.5rem 0.875rem;
+}
+
+.boards-user-email {
+    font-size: 0.75rem;
+    color: var(--boards-text-muted);
+}
+
+/* ============================================
+   User Button
+   ============================================ */
+.boards-user-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    background: transparent;
+    border: 1px solid var(--boards-border);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: var(--boards-transition);
+}
+
+.boards-user-btn:hover {
+    border-color: var(--boards-primary);
+}
+
+.boards-user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.boards-user-avatar-placeholder {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--boards-primary), var(--boards-secondary));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.boards-user-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--boards-text);
+}
+
+/* ============================================
+   Main Content
+   ============================================ */
+.boards-main {
+    min-height: calc(100vh - 120px);
+    padding: 1.5rem;
+}
+
+.boards-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.boards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.boards-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--boards-text);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.boards-title i {
+    color: var(--boards-primary);
+}
+
+.boards-subtitle {
+    color: var(--boards-text-secondary);
+    margin-top: 0.25rem;
+}
+
+/* ============================================
+   Boards Grid
+   ============================================ */
+.boards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.board-card {
+    background: var(--boards-surface);
+    border-radius: var(--boards-radius);
+    overflow: hidden;
+    box-shadow: var(--boards-shadow);
+    transition: var(--boards-transition);
+    cursor: pointer;
+}
+
+.board-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--boards-shadow-lg);
+}
+
+.board-card-header {
+    height: 100px;
+    padding: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.board-card-visibility {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border-radius: 50px;
+    font-size: 0.75rem;
+    color: white;
+}
+
+.board-card-body {
+    padding: 1.25rem;
+}
+
+.board-card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--boards-text);
+    margin: 0 0 0.5rem 0;
+}
+
+.board-card-description {
+    font-size: 0.875rem;
+    color: var(--boards-text-secondary);
+    margin: 0 0 1rem 0;
+}
+
+.board-card-stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.board-stat {
+    font-size: 0.75rem;
+    color: var(--boards-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.board-card-footer {
+    padding: 0 1.25rem 1.25rem;
+}
+
+/* ============================================
+   Empty State
+   ============================================ */
+.boards-empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--boards-surface);
+    border-radius: var(--boards-radius);
+    border: 2px dashed var(--boards-border);
+}
+
+.boards-empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, var(--boards-primary), var(--boards-secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.boards-empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.boards-empty-state p {
+    color: var(--boards-text-secondary);
+    margin: 0 0 1.5rem 0;
+}
+
+/* ============================================
+   Kanban Board
+   ============================================ */
+.kanban-container {
+    height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.5rem 1rem;
+    flex-shrink: 0;
+}
+
+.kanban-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.kanban-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.kanban-visibility-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.kanban-visibility-public {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--boards-success);
+}
+
+.kanban-visibility-private {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--boards-danger);
+}
+
+.kanban-header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.kanban-labels-preview {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.kanban-label-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+.kanban-label-more {
+    font-size: 0.75rem;
+    color: var(--boards-text-muted);
+}
+
+/* Kanban Board Layout */
+.kanban-board {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    flex: 1;
+    padding-bottom: 1rem;
+}
+
+.kanban-column {
+    min-width: 320px;
+    max-width: 320px;
+    background: var(--boards-surface);
+    border-radius: var(--boards-radius);
+    box-shadow: var(--boards-shadow);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 200px);
+}
+
+.kanban-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--boards-border);
+}
+
+.kanban-column-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.kanban-column-count {
+    background: var(--boards-surface-hover);
+    padding: 0.125rem 0.5rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--boards-text-secondary);
+}
+
+.kanban-column-menu-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--boards-text-muted);
+    transition: var(--boards-transition);
+}
+
+.kanban-column-menu-btn:hover {
+    background: var(--boards-surface-hover);
+    color: var(--boards-text);
+}
+
+/* Cards Container */
+.kanban-cards-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+/* Card */
+.kanban-card {
+    background: var(--boards-surface);
+    border: 1px solid var(--boards-border);
+    border-radius: var(--boards-radius-sm);
+    padding: 0.875rem;
+    cursor: pointer;
+    transition: var(--boards-transition);
+}
+
+.kanban-card:hover {
+    border-color: var(--boards-primary);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+}
+
+.kanban-card-ghost {
+    opacity: 0.5;
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.kanban-card-drag {
+    transform: rotate(3deg);
+    box-shadow: var(--boards-shadow-lg);
+}
+
+.kanban-card-labels {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.kanban-card-label {
+    width: 40px;
+    height: 6px;
+    border-radius: 3px;
+}
+
+.kanban-card-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--boards-text);
+    margin-bottom: 0.75rem;
+}
+
+.kanban-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kanban-card-assignees {
+    display: flex;
+}
+
+.kanban-assignee-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--boards-surface);
+    margin-left: -6px;
+}
+
+.kanban-assignee-avatar:first-child {
+    margin-left: 0;
+}
+
+.kanban-assignee-placeholder {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--boards-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.625rem;
+    font-weight: 600;
+    border: 2px solid var(--boards-surface);
+    margin-left: -6px;
+}
+
+.kanban-assignee-placeholder:first-child {
+    margin-left: 0;
+}
+
+.kanban-assignee-more {
+    font-size: 0.6875rem;
+    color: var(--boards-text-muted);
+    margin-left: 0.25rem;
+}
+
+.kanban-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.kanban-card-due {
+    font-size: 0.6875rem;
+    color: var(--boards-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.kanban-card-due.overdue {
+    color: var(--boards-danger);
+}
+
+.kanban-card-priority {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.kanban-card-priority.priority-low {
+    background: var(--boards-success);
+}
+
+.kanban-card-priority.priority-medium {
+    background: var(--boards-warning);
+}
+
+.kanban-card-priority.priority-high {
+    background: #f97316;
+}
+
+.kanban-card-priority.priority-urgent {
+    background: var(--boards-danger);
+}
+
+/* Add Card / Column */
+.kanban-add-card {
+    padding: 0.75rem;
+    border-top: 1px solid var(--boards-border);
+}
+
+.kanban-add-card-btn {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px dashed var(--boards-border);
+    background: transparent;
+    border-radius: var(--boards-radius-sm);
+    color: var(--boards-text-muted);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: var(--boards-transition);
+}
+
+.kanban-add-card-btn:hover {
+    border-color: var(--boards-primary);
+    color: var(--boards-primary);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.kanban-add-column {
+    min-width: 320px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.kanban-add-column-btn {
+    width: 100%;
+    padding: 1rem;
+    border: 2px dashed var(--boards-border);
+    background: transparent;
+    border-radius: var(--boards-radius);
+    color: var(--boards-text-muted);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--boards-transition);
+}
+
+.kanban-add-column-btn:hover {
+    border-color: var(--boards-primary);
+    color: var(--boards-primary);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+/* ============================================
+   Modals
+   ============================================ */
+.boards-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--boards-transition);
+}
+
+.boards-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.boards-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.boards-modal-dialog {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 1rem;
+    transform: scale(0.95) translateY(-20px);
+    transition: var(--boards-transition);
+}
+
+.boards-modal.show .boards-modal-dialog {
+    transform: scale(1) translateY(0);
+}
+
+.boards-modal-sm .boards-modal-dialog {
+    max-width: 380px;
+}
+
+.boards-modal-lg .boards-modal-dialog {
+    max-width: 700px;
+}
+
+.boards-modal-content {
+    background: var(--boards-surface);
+    border-radius: var(--boards-radius);
+    box-shadow: var(--boards-shadow-lg);
+    overflow: hidden;
+}
+
+.boards-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--boards-border);
+}
+
+.boards-modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.boards-modal-title i {
+    color: var(--boards-primary);
+}
+
+.boards-modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    color: var(--boards-text-muted);
+    cursor: pointer;
+    transition: var(--boards-transition);
+}
+
+.boards-modal-close:hover {
+    background: var(--boards-surface-hover);
+    color: var(--boards-text);
+}
+
+.boards-modal-body {
+    padding: 1.25rem;
+}
+
+.boards-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--boards-border);
+    background: var(--boards-surface-hover);
+}
+
+/* ============================================
+   Forms
+   ============================================ */
+.boards-form-group {
+    margin-bottom: 1rem;
+}
+
+.boards-form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--boards-text);
+    margin-bottom: 0.5rem;
+}
+
+.boards-input {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.9375rem;
+    border: 1px solid var(--boards-border);
+    border-radius: var(--boards-radius-sm);
+    background: var(--boards-surface);
+    color: var(--boards-text);
+    transition: var(--boards-transition);
+}
+
+.boards-input:focus {
+    outline: none;
+    border-color: var(--boards-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.boards-input::placeholder {
+    color: var(--boards-text-muted);
+}
+
+.boards-color-input {
+    height: 44px;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.boards-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* ============================================
+   Alerts
+   ============================================ */
+.boards-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: var(--boards-radius-sm);
+    margin: 0.5rem 1.5rem;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.boards-alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--boards-success);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.boards-alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--boards-danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.boards-alert-close {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    color: inherit;
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.boards-alert-close:hover {
+    opacity: 1;
+}
+
+/* ============================================
+   Error Page
+   ============================================ */
+.boards-error-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+}
+
+.boards-error-card {
+    text-align: center;
+    padding: 3rem;
+    background: var(--boards-surface);
+    border-radius: var(--boards-radius);
+    box-shadow: var(--boards-shadow);
+    max-width: 450px;
+}
+
+.boards-error-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--boards-danger);
+    font-size: 2rem;
+}
+
+.boards-error-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem 0;
+}
+
+.boards-error-message {
+    color: var(--boards-text-secondary);
+    margin: 0 0 1.5rem 0;
+}
+
+.boards-error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+.boards-footer {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--boards-text-muted);
+    font-size: 0.875rem;
+    border-top: 1px solid var(--boards-border);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+    .boards-navbar {
+        padding: 0.75rem 1rem;
+    }
+
+    .boards-navbar-actions {
+        gap: 0.5rem;
+    }
+
+    .boards-navbar-actions span {
+        display: none;
+    }
+
+    .boards-main {
+        padding: 1rem;
+    }
+
+    .boards-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .boards-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .kanban-column {
+        min-width: 280px;
+        max-width: 280px;
+    }
+}

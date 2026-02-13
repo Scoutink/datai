@@ -1,0 +1,99 @@
+<section class="content">
+    <div class="content-block">
+        <div class="block-header">
+            <div class="breadcrumb-main">
+                <div class="row">
+                    <div class="col-6">
+                        <h4 class="page-title">{{(isEditMode ? 'EDIT_PAPER' : 'ADD_PAPER') | translate}}</h4>
+                    </div>
+                    <div class="col-6 text-right">
+                        <button mat-raised-button color="primary" (click)="savePaper()" class="m-r-10">
+                            <mat-icon>save</mat-icon> {{'SAVE' | translate}}
+                        </button>
+                        <button mat-flat-button color="warn" [routerLink]="['/papers']">
+                            <mat-icon>close</mat-icon> {{'CANCEL' | translate}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Metadata Form Side Panel -->
+            <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="header">
+                        <h2>{{'METADATA' | translate}}</h2>
+                    </div>
+                    <div class="body">
+                        <form [formGroup]="paperForm">
+                            <div class="row">
+                                <div class="col-12 m-b-10">
+                                    <label class="form-label">{{'NAME' | translate}} *</label>
+                                    <input formControlName="name" class="form-control" type="text"
+                                        placeholder="{{'ENTER_PAPER_NAME' | translate}}">
+                                    <div class="text-danger"
+                                        *ngIf="paperForm.get('name').touched && paperForm.get('name').hasError('required')">
+                                        {{'NAME_IS_REQUIRED' | translate}}
+                                    </div>
+                                </div>
+
+                                <div class="col-12 m-b-10">
+                                    <label class="form-label">{{'CATEGORY' | translate}} *</label>
+                                    <ng-select formControlName="categoryId"
+                                        placeholder="{{'SELECT_CATEGORY' | translate}}" [clearable]="false">
+                                        <ng-option *ngFor="let category of categoryStore.categories()"
+                                            [value]="category.id">
+                                            {{category.name}}
+                                        </ng-option>
+                                    </ng-select>
+                                    <div class="text-danger"
+                                        *ngIf="paperForm.get('categoryId').touched && paperForm.get('categoryId').hasError('required')">
+                                        {{'CATEGORY_IS_REQUIRED' | translate}}
+                                    </div>
+                                </div>
+
+                                <div class="col-12 m-b-10">
+                                    <label class="form-label">{{ 'CLIENT' | translate }}</label>
+                                    <ng-select formControlName="clientId" placeholder="{{'SELECT_CLIENT' | translate}}">
+                                        <ng-option *ngFor="let client of clientStore.clients()" [value]="client.id">
+                                            {{ client.companyName }}
+                                        </ng-option>
+                                    </ng-select>
+                                </div>
+
+                                <div class="col-12 m-b-10">
+                                    <label class="form-label">{{ 'STATUS' | translate }}</label>
+                                    <ng-select formControlName="statusId"
+                                        placeholder="{{ 'SELECT_STATUS' | translate }}">
+                                        <ng-option *ngFor="let status of documentStatusStore.statusList()"
+                                            [value]="status.id">
+                                            <span [style.color]="status.colorCode">{{ status.name }}</span>
+                                        </ng-option>
+                                    </ng-select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">{{'DESCRIPTION' | translate}}</label>
+                                    <textarea formControlName="description" class="form-control" rows="4"
+                                        placeholder="{{'BRIEF_DESCRIPTION' | translate}}"></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor Area -->
+            <div class="col-xl-9 col-lg-8 col-md-12 col-sm-12">
+                <div class="card shadow-sm">
+                    <div class="body bg-white p-4" style="min-height: 80vh;">
+                        <app-paper-editor *ngIf="!isEditMode || (isEditMode && editorData)" [data]="editorData"
+                            [paperId]="paperId" (onChange)="onEditorChange($event)">
+                        </app-paper-editor>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

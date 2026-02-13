@@ -1,0 +1,32 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>{{ 'VERSION' | translate }}</th>
+                        <th>{{ 'CREATED_BY' | translate }}</th>
+                        <th>{{ 'CREATED_DATE' | translate }}</th>
+                        <th>{{ 'ACTION' | translate }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let version of paperVersions; let i = index">
+                        <td>v{{ paperVersions.length - i }}</td>
+                        <td>{{ version.createdBy }}</td>
+                        <td>{{ version.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                        <td>
+                            <button mat-icon-button color="primary" (click)="restoreVersion(version)"
+                                matTooltip="{{ 'RESTORE' | translate }}">
+                                <mat-icon>restore</mat-icon>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="paperVersions.length === 0">
+                        <td colspan="4" class="text-center">{{ 'NO_DATA_FOUND' | translate }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

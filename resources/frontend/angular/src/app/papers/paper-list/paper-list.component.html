@@ -1,0 +1,166 @@
+<section class="content">
+  <div class="content-block">
+    <div class="block-header">
+      <div class="breadcrumb-main">
+        <div class="row">
+          <div class="col-6">
+            <h4 class="page-title">{{(isAssigned ? 'MY_PAPERS' : 'ALL_PAPERS') | translate}}</h4>
+          </div>
+          <div class="col-6">
+            <ul class="breadcrumb-list list-unstyled">
+              <li class="breadcrumb-item bcrumb-1">
+                <a [routerLink]="['/dashboard']"><i class="fas fa-home"></i></a>
+              </li>
+              <li class="breadcrumb-item active">{{(isAssigned ? 'MY_PAPERS' : 'ALL_PAPERS') | translate}}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="body">
+            <div class="row margin-bottom-10">
+              <div class="col-md-3">
+                <button mat-raised-button color="primary" (click)="addPaper()" *appHasClaim="'ALL_PAPERS_CREATE_PAPER'">
+                  <mat-icon>add</mat-icon> {{'ADD_PAPER' | translate}}
+                </button>
+              </div>
+              <div class="col-md-9 text-right">
+                <mat-form-field appearance="outline" class="example-full-width">
+                  <mat-label>{{'SEARCH_PAPER' | translate}}</mat-label>
+                  <input matInput placeholder="{{'SEARCH_PAPER' | translate}}" #input>
+                  <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row margin-bottom-10">
+              <div class="col-md-3">
+                <mat-form-field appearance="outline" class="example-full-width">
+                  <mat-label>{{'CATEGORY' | translate}}</mat-label>
+                  <mat-select (selectionChange)="onCategoryChange($event.value)">
+                    <mat-option value="0">{{'ALL' | translate}}</mat-option>
+                    <mat-option *ngFor="let category of categoryStore.categories()" [value]="category.id">
+                      {{category.name}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-3">
+                <mat-form-field appearance="outline" class="example-full-width">
+                  <mat-label>{{'CLIENT' | translate}}</mat-label>
+                  <mat-select (selectionChange)="onClientChange($event.value)">
+                    <mat-option value="0">{{'ALL' | translate}}</mat-option>
+                    <mat-option *ngFor="let client of clientStore.clients()" [value]="client.id">
+                      {{client.companyName}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-3">
+                <mat-form-field appearance="outline" class="example-full-width">
+                  <mat-label>{{'STATUS' | translate}}</mat-label>
+                  <mat-select (selectionChange)="onStatusChange($event.value)">
+                    <mat-option value="0">{{'ALL' | translate}}</mat-option>
+                    <mat-option *ngFor="let status of documentStatusStore.statusList()" [value]="status.id">
+                      {{status.name}}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table mat-table [dataSource]="dataSource" matSort matSortActive="createdDate" matSortDirection="desc"
+                class="w-100">
+
+                <!-- Action Column -->
+                <ng-container matColumnDef="action">
+                  <th mat-header-cell *matHeaderCellDef> {{'ACTION' | translate}} </th>
+                  <td mat-cell *matCellDef="let row">
+                    <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                      <button mat-menu-item (click)="viewPaper(row)">
+                        <mat-icon>visibility</mat-icon> {{'VIEW' | translate}}
+                      </button>
+                      <button mat-menu-item (click)="editPaper(row)" *appHasClaim="'ALL_PAPERS_EDIT_PAPER'">
+                        <mat-icon>edit</mat-icon> {{'EDIT' | translate}}
+                      </button>
+                      <button mat-menu-item (click)="deletePaper(row)" *appHasClaim="'ALL_PAPERS_DELETE_PAPER'">
+                        <mat-icon>delete</mat-icon> {{'DELETE' | translate}}
+                      </button>
+                      <mat-divider></mat-divider>
+                      <button mat-menu-item (click)="onPermission(row)">
+                        <mat-icon>security</mat-icon> {{'PERMISSIONS' | translate}}
+                      </button>
+                      <button mat-menu-item (click)="onVersionHistory(row)">
+                        <mat-icon>history</mat-icon> {{'VERSION_HISTORY' | translate}}
+                      </button>
+                      <button mat-menu-item (click)="onComment(row)">
+                        <mat-icon>chat</mat-icon> {{'COMMENT' | translate}}
+                      </button>
+                      <button mat-menu-item (click)="onAuditTrail(row)">
+                        <mat-icon>assessment</mat-icon> {{'AUDIT_TRAIL' | translate}}
+                      </button>
+                      <button mat-menu-item (click)="onShareLink(row)">
+                        <mat-icon>share</mat-icon> {{'SHAREABLE_LINK' | translate}}
+                      </button>
+                    </mat-menu>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'NAME' | translate}} </th>
+                  <td mat-cell *matCellDef="let row"> {{row.name}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="categoryName">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'CATEGORY' | translate}} </th>
+                  <td mat-cell *matCellDef="let row"> {{row.categoryName}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="createdDate">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'CREATED_DATE' | translate}} </th>
+                  <td mat-cell *matCellDef="let row"> {{row.createdDate | date: 'dd/MM/yyyy HH:mm'}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="companyName">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'CLIENT' | translate}} </th>
+                  <td mat-cell *matCellDef="let row"> {{row.companyName}} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="statusName">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'STATUS' | translate}} </th>
+                  <td mat-cell *matCellDef="let row">
+                    <span class="label" [style.background-color]="row.colorCode">{{row.statusName}}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="createdBy">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'CREATED_BY' | translate}} </th>
+                  <td mat-cell *matCellDef="let row"> {{row.createdByName}} </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="viewPaper(row)"
+                  class="cursor-pointer"></tr>
+              </table>
+
+              <div *ngIf="dataSource.loading$ | async" class="table-loading-shade">
+                <mat-spinner></mat-spinner>
+              </div>
+
+              <mat-paginator [length]="(dataSource.responseHeader$ | async)?.totalCount" [pageSize]="10"
+                [pageSizeOptions]="[5, 10, 20, 50]"></mat-paginator>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
