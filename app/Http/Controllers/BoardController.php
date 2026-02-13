@@ -22,8 +22,13 @@ class BoardController extends Controller
         $queryString = (object) $request->all();
         $boards = $this->boardRepository->getBoards($queryString);
         $count = $this->boardRepository->getBoardsCount($queryString);
+
         return response()->json($boards)
-            ->withHeaders(['totalCount' => $count]);
+            ->withHeaders([
+                'totalCount' => $count,
+                'pageSize' => $queryString->pageSize ?? count($boards),
+                'skip' => $queryString->skip ?? 0,
+            ]);
     }
 
     public function show($id)

@@ -56,8 +56,8 @@ class BoardRepository extends BaseRepository implements BoardRepositoryInterface
         $query->orderBy($orderBy, $order);
 
         // Pagination
-        if (!empty($attributes->skip) && !empty($attributes->pageSize)) {
-            $query->skip($attributes->skip)->take($attributes->pageSize);
+        if (isset($attributes->skip) && isset($attributes->pageSize)) {
+            $query->skip((int) $attributes->skip)->take((int) $attributes->pageSize);
         }
 
         return $query->get();

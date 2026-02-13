@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\Contracts\BoardMilestoneRepositoryInterface;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class BoardMilestoneController extends Controller
 {
@@ -17,7 +18,18 @@ class BoardMilestoneController extends Controller
 
     public function index($boardId)
     {
-        return response()->json($this->milestoneRepository->getBoardMilestones($boardId));
+        try {
+            return response()->json($this->milestoneRepository->getBoardMilestones($boardId));
+        } catch (\Throwable $e) {
+            Log::error('Unable to load board milestones.', [
+                'boardId' => $boardId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Unable to load board milestones. Ensure board milestone schema is installed correctly.',
+            ], 500);
+        }
     }
 
     public function store(Request $request, $boardId)

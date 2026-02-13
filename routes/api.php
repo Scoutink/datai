@@ -584,6 +584,9 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('hasToken:BOARDS_VIEW_BOARDS')->group(function () {
         Route::get('/boards', [BoardController::class, 'index']);
         Route::get('/boards/{id}', [BoardController::class, 'show']);
+        Route::get('/boards/{boardId}/labels', [BoardController::class, 'getBoardLabels']);
+        Route::get('/boards/{boardId}/tags', [BoardController::class, 'getBoardTags']);
+        Route::get('/boards/{boardId}/milestones', [\App\Http\Controllers\BoardMilestoneController::class, 'index']);
     });
 
     Route::middleware('hasToken:BOARDS_CREATE_BOARD')->group(function () {
@@ -599,8 +602,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/boards/{boardId}/labels', [BoardController::class, 'storeLabel']);
         Route::put('/labels/{id}', [BoardController::class, 'updateLabel']);
         Route::delete('/labels/{id}', [BoardController::class, 'destroyLabel']);
-        Route::get('/boards/{boardId}/labels', [BoardController::class, 'getBoardLabels']);
-        Route::get('/boards/{boardId}/tags', [BoardController::class, 'getBoardTags']);
         Route::post('/boards/{boardId}/tags', [BoardController::class, 'storeBoardTag']);
         Route::put('/tags/{id}', [BoardController::class, 'updateBoardTag']);
         Route::delete('/tags/{id}', [BoardController::class, 'destroyBoardTag']);
@@ -640,7 +641,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('checklist-items/{id}', [BoardController::class, 'destroyChecklistItem']);
 
         // Milestones
-        Route::get('/boards/{boardId}/milestones', [\App\Http\Controllers\BoardMilestoneController::class, 'index']);
         Route::post('/boards/{boardId}/milestones', [\App\Http\Controllers\BoardMilestoneController::class, 'store']);
         Route::put('/board-milestones/{id}', [\App\Http\Controllers\BoardMilestoneController::class, 'update']);
         Route::delete('/board-milestones/{id}', [\App\Http\Controllers\BoardMilestoneController::class, 'destroy']);
