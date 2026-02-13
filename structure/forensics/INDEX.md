@@ -15,9 +15,7 @@ DATAI is a Laravel + Angular compliance/document execution platform where access
 - [RUNBOOK_DB.md](./RUNBOOK_DB.md)
 - [QUALITY_GATES.md](./QUALITY_GATES.md)
 - [CONFLICTS_REPORT.md](./CONFLICTS_REPORT.md)
-- [boards/INDEX.md](./boards/INDEX.md)
-- [boards/BOARDS_FORENSIC_REPORT.md](./boards/BOARDS_FORENSIC_REPORT.md)
-- [boards/BOARDS_REMEDIATION_PLAN.md](./boards/BOARDS_REMEDIATION_PLAN.md)
+
 
 ## Where-to-change quick map
 - Document list/actions -> backend `routes/api.php`, `DocumentController`, `DocumentRepository`; frontend `document/*`, `document-library/*`; DB `documents` + permission/version/comment/audit tables.

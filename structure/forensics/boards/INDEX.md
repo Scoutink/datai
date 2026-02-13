@@ -6,5 +6,4 @@ This folder contains a focused forensic analysis of the Boards subsystem (Larave
 - [BOARDS_FORENSIC_REPORT.md](./BOARDS_FORENSIC_REPORT.md)
 - [BOARDS_REMEDIATION_PLAN.md](./BOARDS_REMEDIATION_PLAN.md)
 
-- [implementation/INDEX.md](./implementation/INDEX.md)
-- [implementation/01_phpmyadmin_patch.sql](./implementation/01_phpmyadmin_patch.sql)
+
