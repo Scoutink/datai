@@ -45,7 +45,6 @@ use App\Http\Controllers\AISummaryController;
 use App\Http\Controllers\DocumentWatermarkController;
 use App\Http\Controllers\WorkflowLogController;
 use App\Http\Controllers\BoardController;
-use App\Http\Controllers\PaperController;
 
 /*
 |--------------------------------------------------------------------------
@@ -577,52 +576,6 @@ Route::get('/document-sharable-link/{id}/download', [DocumentController::class, 
 Route::get('/document-sharable-link/{id}/token', [DocumentTokenController::class, 'getSharedDocumentToken']);
 
 Route::get('/i18n/{fileName}', [LanguageController::class, 'downloadFile']);
-
-
-
-    // Papers module
-    Route::middleware('hasToken:ALL_PAPERS_VIEW_PAPERS')->group(function () {
-        Route::get('/papers', [PaperController::class, 'getPapers']);
-    });
-
-    Route::middleware('hasToken:ASSIGNED_PAPERS_VIEW_PAPERS')->group(function () {
-        Route::get('/paper/assignedPapers', [PaperController::class, 'getAssignedPapers']);
-    });
-
-    Route::group(['middleware' => ['hasToken:ALL_PAPERS_CREATE_PAPER,ASSIGNED_PAPERS_CREATE_PAPER']], function () {
-        Route::post('/paper', [PaperController::class, 'savePaper']);
-    });
-
-    Route::group(['middleware' => ['hasToken:ALL_PAPERS_VIEW_DETAIL,ASSIGNED_PAPERS_VIEW_DETAIL']], function () {
-        Route::get('/paper/{id}', [PaperController::class, 'getById']);
-        Route::get('/paper/{id}/comments', [PaperController::class, 'getComments']);
-        Route::get('/paper/{id}/versions', [PaperController::class, 'getVersions']);
-        Route::get('/paper-sharable-link/{id}', [PaperController::class, 'getShareableLink']);
-    });
-
-    Route::group(['middleware' => ['hasToken:ALL_PAPERS_EDIT_PAPER,ASSIGNED_PAPERS_EDIT_PAPER']], function () {
-        Route::put('/paper/{id}', [PaperController::class, 'updatePaper']);
-    });
-
-    Route::group(['middleware' => ['hasToken:ALL_PAPERS_ARCHIVE_PAPER,ASSIGNED_PAPERS_ARCHIVE_PAPER']], function () {
-        Route::delete('/paper/{id}/archive', [PaperController::class, 'archivePaper']);
-    });
-
-    Route::group(['middleware' => ['hasToken:ALL_PAPERS_DELETE_PAPER,ASSIGNED_PAPERS_DELETE_PAPER']], function () {
-        Route::delete('/paper/{id}', [PaperController::class, 'deletePaper']);
-    });
-
-    Route::group(['middleware' => ['hasToken:ALL_PAPERS_MANAGE_COMMENT,ASSIGNED_PAPERS_MANAGE_COMMENT']], function () {
-        Route::post('/paperComment', [PaperController::class, 'addComment']);
-    });
-
-    Route::group(['middleware' => ['hasToken:ALL_PAPERS_RESTORE_VERSION,ASSIGNED_PAPERS_RESTORE_VERSION']], function () {
-        Route::post('/paper/{paperId}/versions/{versionId}/restore', [PaperController::class, 'restoreVersion']);
-    });
-
-    Route::group(['middleware' => ['hasToken:ALL_PAPERS_MANAGE_SHARABLE_LINK,ASSIGNED_PAPERS_MANAGE_SHARABLE_LINK']], function () {
-        Route::post('/paper-sharable-link', [PaperController::class, 'saveShareableLink']);
-    });
 
 // ============================================
 // KANBAN BOARDS MODULE
