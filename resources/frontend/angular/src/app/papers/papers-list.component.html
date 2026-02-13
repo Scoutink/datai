@@ -1,0 +1,38 @@
+<div class="container-fluid">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>{{ 'ALL_PAPERS' | translate }}</h2>
+    <a class="btn btn-primary" [routerLink]="['/papers/new']" *hasClaim="['ALL_PAPERS_CREATE_PAPER','ASSIGNED_PAPERS_CREATE_PAPER']">
+      {{ 'NEW_PAPER' | translate }}
+    </a>
+  </div>
+
+  <div class="input-group mb-3">
+    <input type="text" class="form-control" [(ngModel)]="searchQuery" [placeholder]="'SEARCH' | translate">
+    <button class="btn btn-outline-secondary" type="button" (click)="load()">{{ 'SEARCH' | translate }}</button>
+  </div>
+
+  <div *ngIf="loading">Loading...</div>
+
+  <div class="table-responsive" *ngIf="!loading">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>{{ 'NAME' | translate }}</th>
+          <th>{{ 'CATEGORY' | translate }}</th>
+          <th>{{ 'STATUS' | translate }}</th>
+          <th>{{ 'CREATED_BY' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let paper of papers">
+          <td>{{ paper.name }}</td>
+          <td>{{ paper.categoryName || '-' }}</td>
+          <td>{{ paper.statusName || '-' }}</td>
+          <td>{{ paper.createdByName || '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="text-muted">{{ 'TOTAL' | translate }}: {{ totalCount }}</p>
+</div>

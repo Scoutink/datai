@@ -100,6 +100,44 @@ export const ROUTES: RouteInfo[] = [
     claims: ['FILE_REQUEST_VIEW_FILE_REQUEST'],
     submenu: [],
   },
+
+  {
+    path: '',
+    title: 'PAPERS',
+    icon: 'file-text',
+    class: 'menu-toggle',
+    groupTitle: false,
+    claims: ['ALL_PAPERS_VIEW_PAPERS', 'ASSIGNED_PAPERS_VIEW_PAPERS', 'ALL_PAPERS_CREATE_PAPER', 'ASSIGNED_PAPERS_CREATE_PAPER'],
+    submenu: [
+      {
+        path: 'papers',
+        title: 'ALL_PAPERS',
+        icon: 'file',
+        class: 'ml-menu',
+        groupTitle: false,
+        claims: ['ALL_PAPERS_VIEW_PAPERS'],
+        submenu: [],
+      },
+      {
+        path: 'papers/new',
+        title: 'NEW_PAPER',
+        icon: 'plus',
+        class: 'ml-menu',
+        groupTitle: false,
+        claims: ['ALL_PAPERS_CREATE_PAPER', 'ASSIGNED_PAPERS_CREATE_PAPER'],
+        submenu: [],
+      },
+      {
+        path: 'papers/assigned',
+        title: 'ASSIGNED_PAPERS',
+        icon: 'user',
+        class: 'ml-menu',
+        groupTitle: false,
+        claims: ['ASSIGNED_PAPERS_VIEW_PAPERS'],
+        submenu: [],
+      }
+    ],
+  },
   {
     path: 'boards',
     title: 'BOARDS',

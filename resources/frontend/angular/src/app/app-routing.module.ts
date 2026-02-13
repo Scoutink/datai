@@ -220,6 +220,34 @@ const routes: Routes = [
                 (m) => m.FILE_REQUEST_ROUTES
               ),
           },
+
+          {
+            path: 'papers',
+            data: { claimType: 'ALL_PAPERS_VIEW_PAPERS' },
+            canActivate: [AuthGuard],
+            loadComponent: () =>
+              import('./papers/papers-list.component').then(
+                (m) => m.PapersListComponent
+              ),
+          },
+          {
+            path: 'papers/new',
+            data: { claimType: ['ALL_PAPERS_CREATE_PAPER', 'ASSIGNED_PAPERS_CREATE_PAPER'] },
+            canActivate: [AuthGuard],
+            loadComponent: () =>
+              import('./papers/paper-create.component').then(
+                (m) => m.PaperCreateComponent
+              ),
+          },
+          {
+            path: 'papers/assigned',
+            data: { claimType: 'ASSIGNED_PAPERS_VIEW_PAPERS' },
+            canActivate: [AuthGuard],
+            loadComponent: () =>
+              import('./papers/assigned-papers-list.component').then(
+                (m) => m.AssignedPapersListComponent
+              ),
+          },
           {
             path: 'boards',
             data: { claimType: 'BOARDS_VIEW_BOARDS' },

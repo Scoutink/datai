@@ -7,6 +7,7 @@ use App\Models\Pages;
 use App\Models\RoleClaims;
 use App\Models\Roles;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PermissionSeederV55 extends BaseSeeder
@@ -15,14 +16,20 @@ class PermissionSeederV55 extends BaseSeeder
     {
         $this->runOnce(function () {
             $adminRole = Roles::where('name', 'Admin')->first();
+            $actorUserId = DB::table('userRoles')->where('roleId', $adminRole?->id)->value('userId')
+                ?? DB::table('users')->value('id');
+            if (!$actorUserId) {
+                return;
+            }
+
             $pageId = '5f9f6e56-4e98-4cfd-a0cd-4a9a81472f3b';
             $now = Carbon::now();
 
             Pages::updateOrCreate(['id' => $pageId], [
                 'name' => 'Papers',
                 'order' => 100,
-                'createdBy' => $adminRole?->id,
-                'modifiedBy' => $adminRole?->id,
+                'createdBy' => $actorUserId,
+                'modifiedBy' => $actorUserId,
                 'isDeleted' => 0,
                 'createdDate' => $now,
                 'modifiedDate' => $now,
@@ -55,8 +62,8 @@ class PermissionSeederV55 extends BaseSeeder
                     'order' => $action['order'],
                     'pageId' => $pageId,
                     'code' => $action['code'],
-                    'createdBy' => $adminRole?->id,
-                    'modifiedBy' => $adminRole?->id,
+                    'createdBy' => $actorUserId,
+                    'modifiedBy' => $actorUserId,
                     'isDeleted' => 0,
                     'createdDate' => $now,
                     'modifiedDate' => $now,
