@@ -364,7 +364,7 @@ opens AiDocumentSummaryComponent
 
 API:
 
-GET /documentSummary/generate/{documentId}
+POST /ai/summarize-document
 
 PDF Signature
 

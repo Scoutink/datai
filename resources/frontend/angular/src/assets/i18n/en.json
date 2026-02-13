@@ -67,7 +67,7 @@
   "YES": "Yes",
   "NO": "No",
   "TYPE": "Type",
-  "USER_ROLE_NAME": "User\/Role Name",
+  "USER_ROLE_NAME": "User/Role Name",
   "EMAIL": "Email",
   "START_DATE": "Start Date",
   "END_DATE": "End Date",
@@ -235,8 +235,8 @@
   "BANNER_IMAGE": "Banner Image",
   "LOGO": "Logo",
   "CHANGE_BANNER": "Change Banner",
-  "ASSIGN_SHARE_WITH_ROLES": "Assign\/share with roles",
-  "ASSIGN_SHARE_WITH_USERS": "Assign\/share with users",
+  "ASSIGN_SHARE_WITH_ROLES": "Assign/share with roles",
+  "ASSIGN_SHARE_WITH_USERS": "Assign/share with users",
   "ARE_YOU_SURE_YOU_WANT_TO_RESTORE_THIS_TO_CURRENT_VERSION": "Are you sure you want to restore this to current version?",
   "CHANGE_S3_SETTING_MESSAGE": "By changing the S3 setting old files will not be avaialbe. Do you want to continue?",
   "LOCAL": "Local Disk (Default)",
@@ -711,5 +711,9 @@
   "TAGS": "Tags",
   "CREATE_TAG": "Create Tag",
   "ADD_TAG": "Add Tag",
-  "NO_TAGS_AVAILABLE": "No tags available"
+  "NO_TAGS_AVAILABLE": "No tags available",
+  "PAPERS": "Papers",
+  "ALL_PAPERS": "All Papers",
+  "NEW_PAPER": "New Paper",
+  "ASSIGNED_PAPERS": "Assigned Papers"
 }
