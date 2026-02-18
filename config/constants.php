@@ -1,5 +1,0 @@
-<?php
-
-return [
-    'APP_VERSION' => '5.3.1',
-];
