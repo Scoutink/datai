@@ -42,7 +42,8 @@
                             <mat-tab label="{{ 'CONTENT' | translate }}">
                                 <div class="p-t-20 min-h-400">
                                     <app-paper-preview *ngIf="loadedTabs[0]" [paperId]="paperId" [paperInfo]="paperInfo"
-                                        [editorData]="editorData">
+                                        [editorData]="editorData"
+                                        [viewOnlyMode]="isViewOnlyMode">
                                     </app-paper-preview>
                                 </div>
                             </mat-tab>

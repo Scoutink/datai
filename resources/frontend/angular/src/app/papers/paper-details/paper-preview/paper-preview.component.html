@@ -1,14 +1,8 @@
 <div class="premium-wrapper">
-  <!-- Premium Toolbar (Matches Documents) -->
   <div class="file-preview-toolbar d-flex">
     <span class="file-name flex-grow-1">{{ paperInfo?.name }}</span>
 
     <div class="toolbar-actions">
-      <button mat-icon-button (click)="toggleViewMode()"
-        [matTooltip]="viewMode === 'PREVIEW' ? ('LIVE_VIEW' | translate) : ('PREVIEW' | translate)">
-        <mat-icon>{{ viewMode === 'PREVIEW' ? 'edit' : 'visibility' }}</mat-icon>
-      </button>
-
       <button mat-icon-button (click)="download()" [matTooltip]="'DOWNLOAD' | translate">
         <mat-icon>file_download</mat-icon>
       </button>
@@ -22,16 +16,8 @@
     </div>
 
     <ng-container *ngIf="!isLoading">
-      <!-- High-Fidelity Native View (Premium) -->
-      <div *ngIf="viewMode === 'PREVIEW'" class="premium-native-view">
+      <div class="premium-native-view">
         <app-paper-editor [data]="editorData" [readOnly]="true" [isPreview]="true" [paperId]="paperId"
-          [mode]="paperInfo?.contentType === 'DOC' ? 'DOC' : 'SHEET'">
-        </app-paper-editor>
-      </div>
-
-      <!-- Live Editor View -->
-      <div *ngIf="viewMode === 'LIVE'" class="live-container">
-        <app-paper-editor [data]="editorData" [readOnly]="false" [paperId]="paperId"
           [mode]="paperInfo?.contentType === 'DOC' ? 'DOC' : 'SHEET'">
         </app-paper-editor>
       </div>

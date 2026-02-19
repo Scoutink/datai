@@ -1,6 +1,12 @@
+import { HttpEvent, HttpEventType } from '@angular/common/http';
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
+import { MaterialModule } from '@shared/material.module';
+import { FeatherIconsModule } from 'src/app/feather-icons/feather-icons.module';
 import { BaseComponent } from 'src/app/base.component';
+import { PaperService } from '../../paper.service';
+import { PaperEditorComponent } from '../../paper-editor/paper-editor.component';
 
 @Component({
     selector: 'app-paper-preview',
@@ -19,19 +25,14 @@ export class PaperPreviewComponent extends BaseComponent implements OnInit {
     @Input() paperId: string;
     @Input() paperInfo: any;
     @Input() editorData: any;
+    @Input() viewOnlyMode = true;
 
-    viewMode: 'PREVIEW' | 'LIVE' = 'PREVIEW';
     documentUrl: Blob | string = null;
     isLoading = false;
 
     private paperService = inject(PaperService);
-    private toastrService = inject(ToastrService);
 
     ngOnInit(): void {
-    }
-
-    toggleViewMode() {
-        this.viewMode = this.viewMode === 'PREVIEW' ? 'LIVE' : 'PREVIEW';
     }
 
     download() {
