@@ -1,0 +1,87 @@
+<div class="modalHeader">
+    <div class="editRowModal">
+        <div class="modalHeader">
+            <div class="title">
+                <h2>{{ 'SHAREABLE_LINK' | translate }}</h2>
+            </div>
+        </div>
+    </div>
+    <button mat-icon-button (click)="closeDialog()" class="modal-close-button" aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+<div mat-dialog-content>
+    <form [formGroup]="paperLinkForm">
+        <div class="row" *ngIf="isEditMode && !isResetLink">
+            <div class="col-md-12">
+                <mat-form-field class="example-full-width" appearance="outline">
+                    <mat-label>{{ 'SHAREABLE_LINK' | translate }}</mat-label>
+                    <input matInput formControlName="linkCode" readonly>
+                    <button mat-icon-button matSuffix [cdkCopyToClipboard]="paperLinkForm.get('linkCode').value">
+                        <mat-icon>content_copy</mat-icon>
+                    </button>
+                </mat-form-field>
+            </div>
+            <div class="col-md-12 text-center m-b-10">
+                <button mat-button color="primary" (click)="isResetLink = true">
+                    {{ 'UPDATE_LINK' | translate }}
+                </button>
+                <button mat-button color="warn" (click)="deleteLink()">
+                    {{ 'DELETE' | translate }}
+                </button>
+            </div>
+        </div>
+        <div class="row" *ngIf="!isEditMode || isResetLink">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-6">
+                        <mat-slide-toggle formControlName="isLinkExpiryTime">{{ 'LINK_EXPIRATION' | translate
+                            }}</mat-slide-toggle>
+                    </div>
+                    <div class="col-md-6" *ngIf="paperLinkForm.get('isLinkExpiryTime').value">
+                        <mat-form-field class="example-full-width" appearance="outline">
+                            <mat-label>{{ 'IS_LINK_VALID_UNTIL' | translate }}</mat-label>
+                            <input matInput [min]="minDate" [owlDateTimeTrigger]="dt1" [owlDateTime]="dt1"
+                                formControlName="linkExpiryTime">
+                            <owl-date-time #dt1></owl-date-time>
+                            <mat-error *ngIf="paperLinkForm.hasError('linkExpiryTimeValidator')">
+                                {{ 'EXPIRY_DATE_IS_REQURED' | translate }}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="row m-t-15">
+                    <div class="col-md-6">
+                        <mat-slide-toggle formControlName="isPassword">{{ 'PASSWORD_PROTECTION' | translate
+                            }}</mat-slide-toggle>
+                    </div>
+                    <div class="col-md-6" *ngIf="paperLinkForm.get('isPassword').value">
+                        <mat-form-field class="example-full-width" appearance="outline">
+                            <mat-label>{{ 'PASSWORD' | translate }}</mat-label>
+                            <input matInput formControlName="password" type="password">
+                            <mat-error *ngIf="paperLinkForm.hasError('passwordValidator')">
+                                {{ 'PASSWORD_IS_REQUIRED' | translate }}
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="row m-t-15">
+                    <div class="col-md-12">
+                        <mat-slide-toggle formControlName="isAllowDownload">{{ 'USERS_WITH_LINK_CAN_DOWNLOAD_THIS_ITEM'
+                            | translate }}</mat-slide-toggle>
+                    </div>
+                </div>
+                <div class="row m-t-20">
+                    <div class="col-md-12 text-center">
+                        <button mat-raised-button color="primary" (click)="createLink()">
+                            {{ (isEditMode ? 'UPDATE_LINK' : 'CREATE_LINK') | translate }}
+                        </button>
+                        <button mat-button (click)="isResetLink = false" *ngIf="isEditMode">
+                            {{ 'CANCEL' | translate }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

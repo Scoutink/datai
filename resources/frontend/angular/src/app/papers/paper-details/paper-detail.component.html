@@ -1,0 +1,117 @@
+<section class="content">
+    <div class="content-block">
+        <div class="block-header">
+            <div class="breadcrumb-main">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="breadcrumb-title">
+                            <h2>{{ 'DETAILS' | translate }}</h2>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <ul class="header-buttons">
+                            <li>
+                                <button mat-icon-button (click)="onPaperCancel()" matTooltip="BACK">
+                                    <mat-icon>arrow_back</mat-icon>
+                                </button>
+                            </li>
+                            <li>
+                                <button *hasClaim="['ALL_PAPERS_EDIT_PAPER', 'MY_PAPERS_EDIT_PAPER']" mat-raised-button
+                                    color="primary" (click)="editPaper()" class="m-r-5">
+                                    <mat-icon>edit</mat-icon>
+                                    {{ 'EDIT' | translate }}
+                                </button>
+                                <button mat-raised-button color="accent" (click)="getShareLink()">
+                                    <mat-icon>share</mat-icon>
+                                    {{ 'SHARE' | translate }}
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="header">
+                        <h2>{{ paperInfo.name }}</h2>
+                    </div>
+                    <div class="body">
+                        <mat-tab-group (selectedTabChange)="onTabChange($event)" [selectedIndex]="activeTabIndex">
+                            <mat-tab label="{{ 'CONTENT' | translate }}">
+                                <div class="p-t-20 min-h-400">
+                                    <app-paper-preview *ngIf="loadedTabs[0]" [paperId]="paperId" [paperInfo]="paperInfo"
+                                        [editorData]="editorData">
+                                    </app-paper-preview>
+                                </div>
+                            </mat-tab>
+                            <mat-tab label="{{ 'GENERAL' | translate }}">
+                                <div class="p-t-20 min-h-400">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <ul class="list-group list-group-unbordered">
+                                                <li class="list-group-item">
+                                                    <b>{{ 'NAME' | translate }}</b> <a class="pull-right">{{
+                                                        paperInfo.name }}</a>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <b>{{ 'CATEGORY' | translate }}</b> <a class="pull-right">{{
+                                                        paperInfo.categoryName }}</a>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <b>{{ 'CLIENT' | translate }}</b> <a class="pull-right">{{
+                                                        paperInfo.companyName }}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <ul class="list-group list-group-unbordered">
+                                                <li class="list-group-item">
+                                                    <b>{{ 'STATUS' | translate }}</b> <a class="pull-right">{{
+                                                        paperInfo.statusName }}</a>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <b>{{ 'CREATED_DATE' | translate }}</b> <a class="pull-right">{{
+                                                        paperInfo.createdDate | date: 'dd/MM/yyyy' }}</a>
+                                                </li>
+                                                <li class="list-group-item">
+                                                    <b>{{ 'CREATED_BY' | translate }}</b> <a class="pull-right">{{
+                                                        paperInfo.createdBy }}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-tab>
+                            <mat-tab label="{{ 'COMMENT' | translate }}">
+                                <div class="p-t-20 min-h-400">
+                                    <app-paper-comments *ngIf="loadedTabs[2]" [paperId]="paperId"
+                                        [shouldLoad]="loadedTabs[2]"></app-paper-comments>
+                                </div>
+                            </mat-tab>
+                            <mat-tab label="{{ 'VERSION_HISTORY' | translate }}">
+                                <div class="p-t-20 min-h-400">
+                                    <app-paper-versions *ngIf="loadedTabs[3]" [paperId]="paperId"
+                                        [shouldLoad]="loadedTabs[3]"></app-paper-versions>
+                                </div>
+                            </mat-tab>
+                            <mat-tab label="{{ 'AUDIT_TRAIL' | translate }}">
+                                <div class="p-t-20 min-h-400">
+                                    <app-paper-audit-trail *ngIf="loadedTabs[4]" [paperId]="paperId"
+                                        [shouldLoad]="loadedTabs[4]"></app-paper-audit-trail>
+                                </div>
+                            </mat-tab>
+                            <mat-tab label="{{ 'PERMISSIONS' | translate }}">
+                                <div class="p-t-20 min-h-400">
+                                    <app-paper-permissions *ngIf="loadedTabs[5]" [paperId]="paperId"
+                                        [shouldLoad]="loadedTabs[5]"></app-paper-permissions>
+                                </div>
+                            </mat-tab>
+                        </mat-tab-group>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

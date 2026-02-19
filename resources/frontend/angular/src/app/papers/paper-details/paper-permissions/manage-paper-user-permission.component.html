@@ -1,0 +1,72 @@
+<div class="modalHeader">
+    <div class="editRowModal">
+        <div class="modalHeader">
+            <div class="title">
+                <h2>{{ 'USER_PERMISSION' | translate }}</h2>
+            </div>
+        </div>
+    </div>
+    <button mat-icon-button (click)="closeDialog()" class="modal-close-button" aria-label="Close dialog">
+        <mat-icon color="warn">close</mat-icon>
+    </button>
+</div>
+<div mat-dialog-content [formGroup]="permissionForm">
+    <div class="row">
+        <div class="form-group col-md-12">
+            <label>{{'USERS' | translate}}</label>
+            <ng-select [multiple]="true" formControlName="selectedUsers">
+                <ng-option *ngFor="let user of data.users" [value]="user">{{user.firstName}}
+                    {{user.lastName}}</ng-option>
+            </ng-select>
+        </div>
+    </div>
+    <div class="row m-t-15">
+        <div class="col-md-12">
+            <mat-checkbox (change)="timeBoundChange($event)" color="primary" formControlName="isTimeBound">
+                {{'SPACIFY_THE_PERIOD' | translate}}
+            </mat-checkbox>
+        </div>
+    </div>
+    <div class="row m-t-10" *ngIf="permissionForm.get('isTimeBound').value">
+        <div class="col-md-6">
+            <mat-form-field class="example-full-width" appearance="outline">
+                <mat-label>{{'CHOOSE_A_START_DATE' | translate}}</mat-label>
+                <input matInput [min]="minDate" [owlDateTimeTrigger]="date1" [owlDateTime]="date1"
+                    formControlName="startDate">
+                <owl-date-time #date1></owl-date-time>
+                <mat-error
+                    *ngIf="permissionForm.get('startDate').touched && permissionForm.get('startDate').hasError('required')">
+                    {{'START_DATE_IS_REQURED' | translate}}
+                </mat-error>
+            </mat-form-field>
+        </div>
+        <div class="col-md-6">
+            <mat-form-field class="example-full-width" appearance="outline">
+                <mat-label>{{'CHOOSE_A_END_DATE' | translate}}</mat-label>
+                <input matInput [min]="permissionForm.get('startDate').value || minDate" [owlDateTimeTrigger]="date2"
+                    [owlDateTime]="date2" formControlName="endDate">
+                <owl-date-time #date2></owl-date-time>
+                <mat-error
+                    *ngIf="permissionForm.get('endDate').touched && permissionForm.get('endDate').hasError('required')">
+                    {{'END_DATE_IS_REQURED' | translate}}
+                </mat-error>
+            </mat-form-field>
+        </div>
+    </div>
+    <div class="row m-t-10">
+        <div class="col-md-12">
+            <mat-checkbox color="primary" formControlName="isAllowDownload">{{'ALLOW_DOWNLOAD' |
+                translate}}</mat-checkbox>
+        </div>
+    </div>
+</div>
+<div mat-dialog-actions class="m-r-10">
+    <button class="btn btn-success btn-sm m-r-10" (click)="savePaperUserPermission()">
+        <i-feather name="save" class="small-icon"></i-feather>
+        {{'SAVE' | translate}}
+    </button>
+    <button class="btn btn-danger btn-sm" (click)="onNoClick()">
+        <i-feather name="x-circle" class="small-icon"></i-feather>
+        {{'CANCEL' | translate}}
+    </button>
+</div>
