@@ -103,6 +103,30 @@ class UpdateController extends Controller
         return view('update.finish');
     }
 
+    public function runMigrationsOnly()
+    {
+        Artisan::call('migrate', [
+            '--force' => true,
+        ]);
+
+        return redirect()->back()->with('taskStatus', [
+            'type' => 'success',
+            'message' => 'Database migration completed.',
+            'output' => trim(Artisan::output()),
+        ]);
+    }
+
+    public function clearRuntimeCaches()
+    {
+        $this->clearCache();
+
+        return redirect()->back()->with('taskStatus', [
+            'type' => 'success',
+            'message' => 'Application cache/config/view/routes were refreshed.',
+            'output' => trim(Artisan::output()),
+        ]);
+    }
+
     private function RunSeeder()
     {
         $seeders = [
