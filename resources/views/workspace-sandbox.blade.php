@@ -6,201 +6,380 @@
   <meta name="csrf-token" content="{{ csrf_token() }}" />
   <title>Workspace Sandbox</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f6f8fb; }
-    .container { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
-    .bar, .panel, .content { background: #fff; border: 1px solid #dfe5ef; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
-    .bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    input, select, button { padding: 8px; }
-    .tree ul { list-style: none; margin: 0; padding-left: 18px; }
-    .tree li { margin: 6px 0; }
-    .node { display: inline-flex; align-items: center; gap: 8px; }
-    .muted { color: #666; font-size: 12px; }
-    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; }
-    .danger { background:#c0392b; color:#fff; border:none; }
+    body { font-family: Arial, sans-serif; margin:0; background:#eef2f7; }
+    .wrap { max-width: 1280px; margin: 14px auto; padding: 0 12px; }
+    .card { background:#fff; border:1px solid #d9e1ee; border-radius:10px; padding:12px; margin-bottom:12px; }
+    .toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .layout { display:grid; grid-template-columns: 1fr 1.2fr; gap:12px; }
+    .tree ul { list-style:none; margin:0; padding-left:18px; }
+    .node-row { display:flex; align-items:center; gap:6px; margin:4px 0; }
+    .node-title { border:1px solid #cad5e7; background:#fff; border-radius:6px; padding:4px 8px; cursor:pointer; }
+    .node-title.selected { background:#e8f0ff; border-color:#5d8cff; }
+    .mini { font-size:12px; color:#6b7280; }
+    .icon-btn { border:1px solid #c3d0e8; background:#fff; border-radius:6px; width:28px; height:28px; cursor:pointer; }
+    .ok { background:#1f8b55; color:#fff; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; }
+    .danger { background:#e11d48; color:#fff; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; }
+    input, select, button, textarea { font: inherit; }
+    input, select, textarea { border:1px solid #c3d0e8; border-radius:8px; padding:8px; }
+    .content-view { min-height:300px; border:1px dashed #c9d5ea; border-radius:8px; padding:10px; background:#fafcff; }
+    .modal-bg { position:fixed; inset:0; background:rgba(9,30,66,.45); display:none; align-items:center; justify-content:center; }
+    .modal { width: 520px; max-width: calc(100vw - 20px); background:#fff; border-radius:12px; padding:14px; }
+    .row { display:flex; gap:8px; align-items:center; margin:8px 0; }
+    .row > * { flex:1; }
+    .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+    pre { white-space:pre-wrap; }
   </style>
 </head>
 <body>
-<div class="container">
-  <h2>Workspace Sandbox (No Build)</h2>
-  <div class="muted">Direct database-backed mockup for backend validation before Angular build.</div>
-
-  <div class="bar">
-    <label>Workspace:</label>
-    <select id="workspaceSelect"></select>
-    <button onclick="loadTree()">Load</button>
-    <input id="newWorkspaceName" placeholder="New workspace name" />
-    <button onclick="createWorkspace()">Create Workspace</button>
-  </div>
-
-  <div class="panel">
-    <strong>Structure actions</strong>
-    <div class="row">
-      <input id="parentId" placeholder="Parent Node ID" style="width:320px;" />
-      <input id="nodeTitle" placeholder="Node title" />
-      <select id="nodeType">
-        <option value="folder">folder</option>
-        <option value="document_link">document_link</option>
-        <option value="paper_link">paper_link</option>
-      </select>
-      <input id="contentRef" placeholder="contentRef UUID (for links)" style="width:320px;" />
-      <button onclick="addNode()">Add Node</button>
-    </div>
-    <div class="row">
-      <input id="renameId" placeholder="Node ID to rename" style="width:320px;" />
-      <input id="renameTitle" placeholder="New title" />
-      <button onclick="renameNode()">Rename</button>
-    </div>
-    <div class="row">
-      <input id="moveId" placeholder="Node ID to move" style="width:320px;" />
-      <input id="moveParentId" placeholder="New parent ID" style="width:320px;" />
-      <input id="moveSortIndex" placeholder="Sort index" type="number" value="0" />
-      <button onclick="moveNode()">Move</button>
-    </div>
-    <div class="row">
-      <input id="deleteId" placeholder="Node ID to delete" style="width:320px;" />
-      <button class="danger" onclick="deleteNode()">Delete Node</button>
+<div class="wrap">
+  <div class="card">
+    <h2 style="margin:0 0 8px 0;">Workspace Sandbox (No Build)</h2>
+    <div class="mini">Isolated sandbox only. No Angular build and no main menu changes.</div>
+    <div class="toolbar" style="margin-top:8px;">
+      <label>Workspace:</label>
+      <select id="workspaceSelect" style="min-width:340px"></select>
+      <button onclick="loadTree()">Load</button>
+      <input id="newWorkspaceName" placeholder="New workspace name" style="max-width:260px" />
+      <button class="ok" onclick="createWorkspace()">Create Workspace</button>
     </div>
   </div>
 
-  <div class="panel tree">
-    <strong>Workspace tree</strong>
-    <div id="treeRoot" class="muted" style="margin-top:8px;">No tree loaded.</div>
-  </div>
+  <div class="layout">
+    <div class="card tree">
+      <h3 style="margin-top:0">Workspace tree</h3>
+      <div id="treeRoot" class="mini">No tree loaded.</div>
+    </div>
 
-  <div class="content">
-    <strong>Selected Node</strong>
-    <pre id="selected" class="muted">(none)</pre>
+    <div>
+      <div class="card">
+        <h3 style="margin-top:0">Selected Node</h3>
+        <div id="nodeSummary" class="mini">Nothing selected.</div>
+        <pre id="selected">(none)</pre>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Content View (Read-only)</h3>
+        <div id="contentView" class="content-view mini">Click a document/paper node to preview content here.</div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Operation Log</h3>
+        <pre id="ops" class="mini">No operations yet.</pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="nodeModalBg">
+  <div class="modal">
+    <h3 id="modalTitle" style="margin:0 0 10px 0;">Node Actions</h3>
+
+    <div class="row">
+      <select id="docSelect"><option value="">Document</option></select>
+      <button class="ok" id="addDocBtn">➕</button>
+    </div>
+
+    <div class="row">
+      <select id="paperSelect"><option value="">Paper</option></select>
+      <button class="ok" id="addPaperBtn">➕</button>
+    </div>
+
+    <div class="row">
+      <input id="folderInput" placeholder="Folder" />
+      <button class="ok" id="addFolderBtn">➕</button>
+    </div>
+
+    <div class="row">
+      <input id="renameInput" placeholder="Rename selected node" />
+      <button id="renameBtn">Rename</button>
+    </div>
+
+    <div class="row">
+      <select id="moveParentSelect"></select>
+      <button id="moveBtn">Move</button>
+    </div>
+
+    <div class="actions">
+      <button id="saveBtn" class="ok">Save</button>
+      <button id="deleteBtn" class="danger">Delete</button>
+      <button onclick="closeModal()">Close</button>
+    </div>
   </div>
 </div>
 
 <script>
 const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 const headers = {'Content-Type':'application/json','X-CSRF-TOKEN':csrf};
-let currentTree = null;
+let tree = null;
+let selectedNode = null;
+let openState = {};
+let docs = [];
+let papers = [];
+let opLog = [];
 
-async function request(url, options={}) {
-  const res = await fetch(url, options);
-  const text = await res.text();
-  let data = null;
-  try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-  if (!res.ok) throw new Error((data && data.message) ? data.message : `HTTP ${res.status}`);
-  return data;
+function log(msg, payload=null){
+  const line = `[${new Date().toLocaleTimeString()}] ${msg}` + (payload ? `\n${JSON.stringify(payload,null,2)}`:'');
+  opLog.unshift(line);
+  document.getElementById('ops').textContent = opLog.slice(0,18).join('\n\n');
 }
 
-async function loadRoots() {
-  const roots = await request('/workspace-sandbox/roots');
-  const select = document.getElementById('workspaceSelect');
-  select.innerHTML = '';
-  for (const r of roots) {
-    const opt = document.createElement('option');
-    opt.value = r.id;
-    opt.textContent = `${r.title} (${r.id})`;
-    select.appendChild(opt);
-  }
-  if (roots.length) {
-    document.getElementById('parentId').value = roots[0].id;
-    await loadTree();
-  }
+async function req(url, options={}){
+  const r = await fetch(url, options);
+  const t = await r.text();
+  let d = null; try { d = t ? JSON.parse(t) : null; } catch { d = t; }
+  if(!r.ok) throw new Error((d && d.message) ? d.message : `HTTP ${r.status}`);
+  return d;
 }
 
-async function loadTree() {
-  const id = document.getElementById('workspaceSelect').value;
-  if (!id) return;
-  currentTree = await request(`/workspace-sandbox/tree/${id}`);
+async function init(){
+  await Promise.all([loadRoots(), loadLookups()]);
+}
+
+async function loadLookups(){
+  docs = await req('/workspace-sandbox/documents');
+  papers = await req('/workspace-sandbox/papers');
+  fillSelect('docSelect', docs, 'Document');
+  fillSelect('paperSelect', papers, 'Paper');
+}
+
+function fillSelect(id, items, placeholder){
+  const el = document.getElementById(id);
+  el.innerHTML = `<option value="">${placeholder}</option>`;
+  items.forEach(i => {
+    const o = document.createElement('option');
+    o.value = i.id;
+    o.textContent = i.name || `${placeholder} ${i.id}`;
+    el.appendChild(o);
+  });
+}
+
+async function loadRoots(){
+  const roots = await req('/workspace-sandbox/roots');
+  const s = document.getElementById('workspaceSelect');
+  s.innerHTML='';
+  roots.forEach(r=>{
+    const o=document.createElement('option'); o.value=r.id; o.textContent=`${r.title} (${r.id})`; s.appendChild(o);
+  });
+  if(roots.length){ await loadTree(); }
+}
+
+async function loadTree(){
+  const rootId = document.getElementById('workspaceSelect').value;
+  if(!rootId) return;
+  tree = await req(`/workspace-sandbox/tree/${rootId}`);
+  selectedNode = tree;
   renderTree();
+  renderSelected();
+  renderMoveTargets();
 }
 
-function renderTree() {
-  const rootEl = document.getElementById('treeRoot');
-  rootEl.innerHTML = '';
-  if (!currentTree) { rootEl.textContent = 'No tree loaded.'; return; }
-  rootEl.appendChild(renderNode(currentTree));
+function renderTree(){
+  const host = document.getElementById('treeRoot');
+  host.innerHTML = '';
+  if(!tree){ host.textContent='No tree loaded'; return; }
+  const ul = document.createElement('ul');
+  ul.appendChild(renderNode(tree));
+  host.appendChild(ul);
 }
 
-function renderNode(node) {
+function renderNode(node){
   const li = document.createElement('li');
-  const row = document.createElement('div');
-  row.className = 'node';
-  const btn = document.createElement('button');
-  btn.textContent = node.title;
-  btn.onclick = () => {
-    document.getElementById('selected').textContent = JSON.stringify(node, null, 2);
-    document.getElementById('parentId').value = node.id;
-  };
-  const meta = document.createElement('span');
-  meta.className = 'muted';
-  meta.textContent = `${node.nodeType} • ${node.id}`;
-  row.appendChild(btn);
-  row.appendChild(meta);
+  const row = document.createElement('div'); row.className='node-row';
+  const exp = document.createElement('button'); exp.className='icon-btn';
+  const hasChildren = node.children && node.children.length;
+  exp.textContent = hasChildren ? (openState[node.id]===false ? '▸':'▾') : '•';
+  exp.disabled = !hasChildren;
+  exp.onclick = ()=>{ openState[node.id] = !(openState[node.id]!==false); renderTree(); };
+
+  const title = document.createElement('button');
+  title.className = 'node-title' + (selectedNode && selectedNode.id===node.id ? ' selected':'');
+  title.textContent = node.title;
+  title.onclick = ()=> selectNode(node);
+
+  const meta = document.createElement('span'); meta.className='mini'; meta.textContent = `${node.nodeType}`;
+  const action = document.createElement('button'); action.className='icon-btn'; action.textContent='⚙'; action.title='Node actions'; action.onclick=()=>{ selectNode(node); openModal(); };
+
+  row.append(exp,title,meta,action);
   li.appendChild(row);
 
-  if (node.children && node.children.length) {
+  if(hasChildren && openState[node.id]!==false){
     const ul = document.createElement('ul');
-    for (const child of node.children) ul.appendChild(renderNode(child));
+    node.children.forEach(c=>ul.appendChild(renderNode(c)));
     li.appendChild(ul);
   }
   return li;
 }
 
-async function createWorkspace() {
+function selectNode(node){
+  selectedNode = node;
+  renderTree();
+  renderSelected();
+  renderMoveTargets();
+  if(node.nodeType==='document_link' || node.nodeType==='paper_link') loadContent(node.id);
+}
+
+function renderSelected(){
+  document.getElementById('selected').textContent = selectedNode ? JSON.stringify(selectedNode,null,2) : '(none)';
+  document.getElementById('nodeSummary').textContent = selectedNode ? `${selectedNode.title} • ${selectedNode.nodeType}` : 'Nothing selected.';
+}
+
+async function loadContent(nodeId){
+  const view = document.getElementById('contentView');
+  view.textContent = 'Loading content...';
+  try {
+    const data = await req(`/workspace-sandbox/content/node/${nodeId}`);
+    if (data.missing) {
+      view.innerHTML = `<b>Linked content missing</b>`;
+      return;
+    }
+    if (data.type === 'document') {
+      view.innerHTML = `<h4>${escapeHtml(data.title || 'Document')}</h4>
+        <div class="mini">${escapeHtml(data.description || '')}</div>
+        <div class="mini">Created: ${escapeHtml(String(data.createdDate || ''))}</div>
+        ${data.url ? `<div class="mini">URL: ${escapeHtml(data.url)}</div>` : ''}
+        <div style="margin-top:8px"><a href="${data.officeViewerUrl}" target="_blank">Open document viewer in new tab</a></div>`;
+      return;
+    }
+    if (data.type === 'paper') {
+      view.innerHTML = `<h4>${escapeHtml(data.title || 'Paper')}</h4>
+        <div class="mini">Type: ${escapeHtml(data.contentType || '')}</div>
+        <div class="mini">Created: ${escapeHtml(String(data.createdDate || ''))}</div>
+        <pre>${escapeHtml(data.text || '(no text)')}</pre>`;
+      return;
+    }
+    view.innerHTML = `<div class="mini">${escapeHtml(data.title || 'Node selected')}</div>`;
+  } catch (e) {
+    view.textContent = `Error loading content: ${e.message}`;
+  }
+}
+
+function flatten(node, acc=[]){ acc.push(node); (node.children||[]).forEach(c=>flatten(c,acc)); return acc; }
+
+function renderMoveTargets(){
+  const s = document.getElementById('moveParentSelect');
+  s.innerHTML = '';
+  if(!tree || !selectedNode) return;
+  const all = flatten(tree,[]).filter(n => ['workspace_root','folder'].includes(n.nodeType));
+  all.forEach(n=>{
+    if(n.id===selectedNode.id) return;
+    const o=document.createElement('option'); o.value=n.id; o.textContent=`${n.title} (${n.nodeType})`; s.appendChild(o);
+  });
+}
+
+function openModal(){
+  if(!selectedNode) return alert('Select a node first');
+  document.getElementById('modalTitle').textContent = `Node actions: ${selectedNode.title}`;
+  document.getElementById('renameInput').value = selectedNode.title || '';
+  const disableAdd = !['workspace_root','folder'].includes(selectedNode.nodeType);
+  ['addDocBtn','addPaperBtn','addFolderBtn'].forEach(id=>document.getElementById(id).disabled=disableAdd);
+  document.getElementById('deleteBtn').disabled = selectedNode.nodeType==='workspace_root';
+  document.getElementById('nodeModalBg').style.display='flex';
+}
+function closeModal(){ document.getElementById('nodeModalBg').style.display='none'; }
+
+document.getElementById('addDocBtn').onclick = async () => {
+  try {
+    const docId = document.getElementById('docSelect').value;
+    if(!docId) return alert('Select document first');
+    const doc = docs.find(d=>d.id===docId);
+    await req('/workspace-sandbox/nodes', {method:'POST', headers, body:JSON.stringify({
+      workspaceRootId: tree.workspaceRootId || tree.id,
+      parentId: selectedNode.id,
+      nodeType: 'document_link',
+      title: doc?.name || 'Document',
+      contentKind: 'document',
+      contentRef: docId
+    })});
+    log('Added document link node', {docId, parent:selectedNode.id});
+    await loadTree();
+  } catch(e){ alert(e.message); }
+};
+
+document.getElementById('addPaperBtn').onclick = async () => {
+  try {
+    const paperId = document.getElementById('paperSelect').value;
+    if(!paperId) return alert('Select paper first');
+    const paper = papers.find(p=>p.id===paperId);
+    await req('/workspace-sandbox/nodes', {method:'POST', headers, body:JSON.stringify({
+      workspaceRootId: tree.workspaceRootId || tree.id,
+      parentId: selectedNode.id,
+      nodeType: 'paper_link',
+      title: paper?.name || 'Paper',
+      contentKind: 'paper',
+      contentRef: paperId
+    })});
+    log('Added paper link node', {paperId, parent:selectedNode.id});
+    await loadTree();
+  } catch(e){ alert(e.message); }
+};
+
+document.getElementById('addFolderBtn').onclick = async () => {
+  try {
+    const folder = document.getElementById('folderInput').value.trim();
+    if(!folder) return alert('Folder name is required');
+    await req('/workspace-sandbox/nodes', {method:'POST', headers, body:JSON.stringify({
+      workspaceRootId: tree.workspaceRootId || tree.id,
+      parentId: selectedNode.id,
+      nodeType: 'folder',
+      title: folder
+    })});
+    document.getElementById('folderInput').value='';
+    log('Added folder node', {title:folder, parent:selectedNode.id});
+    await loadTree();
+  } catch(e){ alert(e.message); }
+};
+
+document.getElementById('renameBtn').onclick = async () => {
+  try {
+    const title = document.getElementById('renameInput').value.trim();
+    if(!title) return alert('New title required');
+    await req(`/workspace-sandbox/nodes/${selectedNode.id}/rename`, {method:'POST', headers, body:JSON.stringify({title})});
+    log('Renamed node', {id:selectedNode.id, title});
+    await loadTree();
+  } catch(e){ alert(e.message); }
+};
+
+document.getElementById('moveBtn').onclick = async () => {
+  try {
+    const parentId = document.getElementById('moveParentSelect').value;
+    if(!parentId) return alert('Choose destination folder/root');
+    await req(`/workspace-sandbox/nodes/${selectedNode.id}/move`, {method:'POST', headers, body:JSON.stringify({parentId, sortIndex:9999})});
+    log('Moved node', {id:selectedNode.id, parentId});
+    await loadTree();
+  } catch(e){ alert(e.message); }
+};
+
+document.getElementById('deleteBtn').onclick = async () => {
+  try {
+    if(!confirm('Delete selected node structurally?')) return;
+    await req(`/workspace-sandbox/nodes/${selectedNode.id}/delete`, {method:'POST', headers});
+    log('Deleted node', {id:selectedNode.id});
+    await loadTree();
+    closeModal();
+  } catch(e){ alert(e.message); }
+};
+
+document.getElementById('saveBtn').onclick = () => { log('Save clicked (autosave mode)', {selected:selectedNode?.id}); closeModal(); };
+
+async function createWorkspace(){
   try {
     const title = document.getElementById('newWorkspaceName').value.trim();
-    if (!title) return alert('Workspace name required');
-    await request('/workspace-sandbox/roots', {method:'POST', headers, body: JSON.stringify({title})});
-    document.getElementById('newWorkspaceName').value = '';
+    if(!title) return alert('Workspace name required');
+    await req('/workspace-sandbox/roots', {method:'POST', headers, body:JSON.stringify({title})});
+    document.getElementById('newWorkspaceName').value='';
+    log('Created workspace', {title});
     await loadRoots();
-  } catch (e) { alert(e.message); }
+  } catch(e){ alert(e.message); }
 }
 
-async function addNode() {
-  try {
-    const rootId = document.getElementById('workspaceSelect').value;
-    const parentId = document.getElementById('parentId').value.trim();
-    const title = document.getElementById('nodeTitle').value.trim();
-    const nodeType = document.getElementById('nodeType').value;
-    const contentRef = document.getElementById('contentRef').value.trim();
-    const payload = {workspaceRootId: rootId, parentId, nodeType, title};
-    if (nodeType !== 'folder' && contentRef) {
-      payload.contentRef = contentRef;
-      payload.contentKind = nodeType === 'document_link' ? 'document' : 'paper';
-    }
-    await request('/workspace-sandbox/nodes', {method:'POST', headers, body: JSON.stringify(payload)});
-    document.getElementById('nodeTitle').value = '';
-    document.getElementById('contentRef').value = '';
-    await loadTree();
-  } catch (e) { alert(e.message); }
+function escapeHtml(v){
+  return String(v)
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#39;');
 }
 
-async function renameNode() {
-  try {
-    const id = document.getElementById('renameId').value.trim();
-    const title = document.getElementById('renameTitle').value.trim();
-    await request(`/workspace-sandbox/nodes/${id}/rename`, {method:'POST', headers, body: JSON.stringify({title})});
-    await loadTree();
-  } catch (e) { alert(e.message); }
-}
-
-async function moveNode() {
-  try {
-    const id = document.getElementById('moveId').value.trim();
-    const parentId = document.getElementById('moveParentId').value.trim();
-    const sortIndex = Number(document.getElementById('moveSortIndex').value || 0);
-    await request(`/workspace-sandbox/nodes/${id}/move`, {method:'POST', headers, body: JSON.stringify({parentId, sortIndex})});
-    await loadTree();
-  } catch (e) { alert(e.message); }
-}
-
-async function deleteNode() {
-  try {
-    const id = document.getElementById('deleteId').value.trim();
-    await request(`/workspace-sandbox/nodes/${id}/delete`, {method:'POST', headers});
-    await loadTree();
-  } catch (e) { alert(e.message); }
-}
-
-loadRoots().catch(err => {
-  document.getElementById('treeRoot').textContent = `Error: ${err.message}`;
-});
+init().catch(e=>{ document.getElementById('treeRoot').textContent = `Init error: ${e.message}`; });
 </script>
 </body>
 </html>

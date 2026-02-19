@@ -17,15 +17,15 @@ class WorkspaceSandboxController extends Controller
 
     public function roots(): JsonResponse
     {
-        $roots = DB::table('workspaceNodes')
-            ->where('isDeleted', 0)
-            ->whereNull('deleted_at')
-            ->where('nodeType', 'workspace_root')
-            ->whereNull('parentId')
-            ->orderBy('title')
-            ->get();
-
-        return response()->json($roots);
+        return response()->json(
+            DB::table('workspaceNodes')
+                ->where('isDeleted', 0)
+                ->whereNull('deleted_at')
+                ->where('nodeType', 'workspace_root')
+                ->whereNull('parentId')
+                ->orderBy('title')
+                ->get()
+        );
     }
 
     public function tree(string $id): JsonResponse
@@ -42,24 +42,101 @@ class WorkspaceSandboxController extends Controller
             return response()->json(['message' => 'Workspace not found'], 404);
         }
 
-        $grouped = $nodes->groupBy('parentId');
-        return response()->json($this->serializeNode((array) $root, $grouped));
+        return response()->json($this->serializeNode((array) $root, $nodes->groupBy('parentId')));
+    }
+
+    public function listDocuments(): JsonResponse
+    {
+        $docs = DB::table('documents')
+            ->where('isDeleted', 0)
+            ->whereNull('deleted_at')
+            ->orderBy('name')
+            ->limit(200)
+            ->get(['id', 'name', 'url', 'description', 'createdDate']);
+
+        return response()->json($docs);
+    }
+
+    public function listPapers(): JsonResponse
+    {
+        $papers = DB::table('papers')
+            ->where('isDeleted', 0)
+            ->whereNull('deleted_at')
+            ->orderBy('name')
+            ->limit(200)
+            ->get(['id', 'name', 'contentType', 'contentText', 'createdDate']);
+
+        return response()->json($papers);
+    }
+
+    public function contentByNode(string $nodeId): JsonResponse
+    {
+        $node = DB::table('workspaceNodes')
+            ->where('id', $nodeId)
+            ->where('isDeleted', 0)
+            ->whereNull('deleted_at')
+            ->first();
+
+        if (!$node) {
+            return response()->json(['message' => 'Node not found.'], 404);
+        }
+
+        if ($node->nodeType === 'document_link' && $node->contentRef) {
+            $doc = DB::table('documents')
+                ->where('id', $node->contentRef)
+                ->where('isDeleted', 0)
+                ->whereNull('deleted_at')
+                ->first(['id', 'name', 'url', 'description', 'createdDate']);
+
+            if (!$doc) {
+                return response()->json(['type' => 'document', 'missing' => true]);
+            }
+
+            return response()->json([
+                'type' => 'document',
+                'title' => $doc->name,
+                'description' => $doc->description,
+                'createdDate' => $doc->createdDate,
+                'url' => $doc->url,
+                'officeViewerUrl' => url('/api/document/' . $doc->id . '/officeviewer'),
+            ]);
+        }
+
+        if ($node->nodeType === 'paper_link' && $node->contentRef) {
+            $paper = DB::table('papers')
+                ->where('id', $node->contentRef)
+                ->where('isDeleted', 0)
+                ->whereNull('deleted_at')
+                ->first(['id', 'name', 'description', 'contentText', 'contentType', 'createdDate']);
+
+            if (!$paper) {
+                return response()->json(['type' => 'paper', 'missing' => true]);
+            }
+
+            return response()->json([
+                'type' => 'paper',
+                'title' => $paper->name,
+                'description' => $paper->description,
+                'contentType' => $paper->contentType,
+                'createdDate' => $paper->createdDate,
+                'text' => mb_substr((string)($paper->contentText ?? ''), 0, 5000),
+            ]);
+        }
+
+        return response()->json(['type' => 'node', 'title' => $node->title, 'nodeType' => $node->nodeType]);
     }
 
     public function createRoot(Request $request): JsonResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
+        $request->validate(['title' => 'required|string|max:255', 'description' => 'nullable|string']);
 
         $actorId = $this->actorId();
         if (!$actorId) {
-            return response()->json(['message' => 'No user available to attribute createdBy.'], 422);
+            return response()->json(['message' => 'No user available for createdBy.'], 422);
         }
 
-        $now = now();
         $id = Uuid::uuid4()->toString();
+        $now = now();
 
         DB::table('workspaceNodes')->insert([
             'id' => $id,
@@ -94,32 +171,28 @@ class WorkspaceSandboxController extends Controller
             'contentRef' => 'nullable|uuid',
         ]);
 
-        $actorId = $this->actorId();
-        if (!$actorId) {
-            return response()->json(['message' => 'No user available to attribute createdBy.'], 422);
-        }
-
-        $parent = DB::table('workspaceNodes')
-            ->where('id', $request->parentId)
-            ->where('isDeleted', 0)
-            ->whereNull('deleted_at')
-            ->first();
-
+        $parent = $this->activeNode($request->parentId);
         if (!$parent) {
             return response()->json(['message' => 'Parent not found.'], 404);
         }
-
         if (!in_array($parent->nodeType, ['workspace_root', 'folder'], true)) {
             return response()->json(['message' => 'Parent must be workspace_root or folder.'], 422);
         }
-
         if ($parent->workspaceRootId !== $request->workspaceRootId) {
             return response()->json(['message' => 'Cross workspace add is not allowed.'], 422);
         }
 
-        $now = now();
-        $id = Uuid::uuid4()->toString();
+        if (in_array($request->nodeType, ['document_link', 'paper_link'], true) && !$request->contentRef) {
+            return response()->json(['message' => 'contentRef is required for linked nodes.'], 422);
+        }
 
+        $actorId = $this->actorId();
+        if (!$actorId) {
+            return response()->json(['message' => 'No user available for createdBy.'], 422);
+        }
+
+        $id = Uuid::uuid4()->toString();
+        $now = now();
         DB::table('workspaceNodes')->insert([
             'id' => $id,
             'nodeType' => $request->nodeType,
@@ -132,8 +205,8 @@ class WorkspaceSandboxController extends Controller
                 ->where('parentId', $request->parentId)
                 ->where('isDeleted', 0)
                 ->count(),
-            'contentKind' => $request->input('contentKind'),
-            'contentRef' => $request->input('contentRef'),
+            'contentKind' => $request->contentKind,
+            'contentRef' => $request->contentRef,
             'createdBy' => $actorId,
             'modifiedBy' => $actorId,
             'deletedBy' => null,
@@ -149,8 +222,7 @@ class WorkspaceSandboxController extends Controller
     public function renameNode(Request $request, string $id): JsonResponse
     {
         $request->validate(['title' => 'required|string|max:255']);
-        $node = DB::table('workspaceNodes')->where('id', $id)->where('isDeleted', 0)->first();
-
+        $node = $this->activeNode($id);
         if (!$node) {
             return response()->json(['message' => 'Node not found.'], 404);
         }
@@ -166,24 +238,25 @@ class WorkspaceSandboxController extends Controller
 
     public function moveNode(Request $request, string $id): JsonResponse
     {
-        $request->validate([
-            'parentId' => 'required|uuid',
-            'sortIndex' => 'required|integer|min:0',
-        ]);
+        $request->validate(['parentId' => 'required|uuid', 'sortIndex' => 'required|integer|min:0']);
 
-        $node = DB::table('workspaceNodes')->where('id', $id)->where('isDeleted', 0)->first();
-        $parent = DB::table('workspaceNodes')->where('id', $request->parentId)->where('isDeleted', 0)->first();
+        $node = $this->activeNode($id);
+        $parent = $this->activeNode($request->parentId);
 
         if (!$node || !$parent) {
             return response()->json(['message' => 'Node/parent not found.'], 404);
         }
-
         if ($node->nodeType === 'workspace_root') {
             return response()->json(['message' => 'Cannot move workspace root.'], 422);
         }
-
+        if (!in_array($parent->nodeType, ['workspace_root', 'folder'], true)) {
+            return response()->json(['message' => 'Destination parent must be workspace_root or folder.'], 422);
+        }
         if ($node->workspaceRootId !== $parent->workspaceRootId) {
             return response()->json(['message' => 'Cross workspace move not allowed.'], 422);
+        }
+        if ($parent->id === $node->id || in_array($parent->id, $this->collectDescendantIds($node->id), true)) {
+            return response()->json(['message' => 'Invalid move (cycle).'], 422);
         }
 
         DB::table('workspaceNodes')->where('id', $id)->update([
@@ -193,22 +266,23 @@ class WorkspaceSandboxController extends Controller
             'modifiedDate' => now(),
         ]);
 
+        $this->reindex($node->workspaceRootId, $node->parentId);
+        $this->reindex($node->workspaceRootId, $request->parentId);
+
         return response()->json(['success' => true]);
     }
 
     public function deleteNode(string $id): JsonResponse
     {
-        $node = DB::table('workspaceNodes')->where('id', $id)->where('isDeleted', 0)->first();
+        $node = $this->activeNode($id);
         if (!$node) {
             return response()->json(['message' => 'Node not found'], 404);
         }
-
         if ($node->nodeType === 'workspace_root') {
-            return response()->json(['message' => 'Cannot delete workspace root from sandbox node delete.'], 422);
+            return response()->json(['message' => 'Cannot delete workspace root here.'], 422);
         }
 
         $ids = array_values(array_unique(array_merge([$id], $this->collectDescendantIds($id))));
-
         DB::table('workspaceNodes')->whereIn('id', $ids)->update([
             'isDeleted' => 1,
             'deletedBy' => $this->actorId(),
@@ -216,7 +290,25 @@ class WorkspaceSandboxController extends Controller
             'modifiedDate' => now(),
         ]);
 
+        $this->reindex($node->workspaceRootId, $node->parentId);
+
         return response()->json(['deleted' => $ids]);
+    }
+
+    private function reindex(string $workspaceRootId, ?string $parentId): void
+    {
+        $siblings = DB::table('workspaceNodes')
+            ->where('workspaceRootId', $workspaceRootId)
+            ->where('isDeleted', 0)
+            ->whereNull('deleted_at')
+            ->where('parentId', $parentId)
+            ->orderBy('sortIndex')
+            ->orderBy('createdDate')
+            ->get(['id']);
+
+        foreach ($siblings as $idx => $sibling) {
+            DB::table('workspaceNodes')->where('id', $sibling->id)->update(['sortIndex' => $idx]);
+        }
     }
 
     private function collectDescendantIds(string $id): array
@@ -224,6 +316,7 @@ class WorkspaceSandboxController extends Controller
         $children = DB::table('workspaceNodes')
             ->where('parentId', $id)
             ->where('isDeleted', 0)
+            ->whereNull('deleted_at')
             ->pluck('id')
             ->all();
 
@@ -238,14 +331,18 @@ class WorkspaceSandboxController extends Controller
 
     private function serializeNode(array $node, $grouped): array
     {
-        $children = collect($grouped->get($node['id'], []))
+        $node['children'] = collect($grouped->get($node['id'], []))
             ->sortBy('sortIndex')
             ->map(fn ($child) => $this->serializeNode((array) $child, $grouped))
             ->values()
             ->all();
 
-        $node['children'] = $children;
         return $node;
+    }
+
+    private function activeNode(string $id): ?object
+    {
+        return DB::table('workspaceNodes')->where('id', $id)->where('isDeleted', 0)->whereNull('deleted_at')->first();
     }
 
     private function actorId(): ?string
