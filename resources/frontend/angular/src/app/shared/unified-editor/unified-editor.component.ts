@@ -45,7 +45,7 @@ import UIEnUS from '@univerjs/ui/locale/en-US';
     template: `
         <div class="unified-editor-container">
             <!-- Light Viewer Mode (100% stable, no UniverJS engine) -->
-            <div *ngIf="readOnly" class="light-viewer" #lightViewer>
+            <div *ngIf="readOnly && !isPreview" class="light-viewer" #lightViewer>
                 <div *ngIf="mode === 'DOC'" [innerHTML]="staticHtml" class="doc-viewer-content"></div>
                 <!-- Static Sheet Viewer -->
                 <div *ngIf="mode === 'SHEET'" class="sheet-static-viewer">
@@ -158,17 +158,20 @@ export class UnifiedEditorComponent implements OnInit, AfterViewInit, OnDestroy,
     private univer: any = null;
     private univerAPI: any = null;
     private isDestroyed: boolean = false;
+    private readOnlyKeydownHandler: ((event: KeyboardEvent) => void) | null = null;
+    private readOnlyPasteHandler: ((event: ClipboardEvent) => void) | null = null;
+    private readOnlyCutHandler: ((event: ClipboardEvent) => void) | null = null;
 
     constructor(private http: HttpClient) { }
 
     ngOnInit(): void {
-        if (this.readOnly) {
+        if (this.readOnly && !this.isPreview) {
             this.prepareLightView();
         }
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (this.readOnly) {
+        if (this.readOnly && !this.isPreview) {
             this.prepareLightView();
             return;
         }
@@ -176,8 +179,9 @@ export class UnifiedEditorComponent implements OnInit, AfterViewInit, OnDestroy,
         const modeChanged = changes['mode'] && !changes['mode'].firstChange;
         const dataChanged = changes['initialData'] && !changes['initialData'].firstChange;
         const readOnlyChanged = changes['readOnly'] && !changes['readOnly'].firstChange;
+        const previewChanged = changes['isPreview'] && !changes['isPreview'].firstChange;
 
-        if (modeChanged || dataChanged || readOnlyChanged) {
+        if (modeChanged || dataChanged || readOnlyChanged || previewChanged) {
             this.reinitEditor();
         }
     }
@@ -314,6 +318,11 @@ export class UnifiedEditorComponent implements OnInit, AfterViewInit, OnDestroy,
 
             this.univer = univer;
             this.univerAPI = FUniver.newAPI(univer);
+
+            if (this.readOnly && this.isPreview) {
+                this.applyReadOnlyInteractionGuards(container);
+            }
+
             this.isLoading = false;
             this.onReady.emit();
 
@@ -366,7 +375,72 @@ export class UnifiedEditorComponent implements OnInit, AfterViewInit, OnDestroy,
         injector.add([IImageIoService, { useValue: platformImageIoService }]);
     }
 
+
+    private applyReadOnlyInteractionGuards(container: HTMLElement) {
+        this.removeReadOnlyInteractionGuards(container);
+
+        this.readOnlyKeydownHandler = (event: KeyboardEvent) => {
+            const key = event.key?.toLowerCase();
+            const ctrlOrMeta = event.ctrlKey || event.metaKey;
+
+            const allowCombination = ctrlOrMeta && (key === 'c' || key === 'a');
+            const allowNavigation = [
+                'arrowup', 'arrowdown', 'arrowleft', 'arrowright',
+                'pageup', 'pagedown', 'home', 'end', 'tab', 'escape'
+            ].includes(key);
+
+            if (allowCombination || allowNavigation) {
+                return;
+            }
+
+            const shouldBlock =
+                key === 'enter' ||
+                key === 'backspace' ||
+                key === 'delete' ||
+                key === ' ' ||
+                key.length === 1 ||
+                (ctrlOrMeta && (key === 'v' || key === 'x' || key === 'z' || key === 'y' || key === 'b' || key === 'i' || key === 'u'));
+
+            if (shouldBlock) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        };
+
+        this.readOnlyPasteHandler = (event: ClipboardEvent) => {
+            event.preventDefault();
+            event.stopPropagation();
+        };
+
+        this.readOnlyCutHandler = (event: ClipboardEvent) => {
+            event.preventDefault();
+            event.stopPropagation();
+        };
+
+        container.addEventListener('keydown', this.readOnlyKeydownHandler, true);
+        container.addEventListener('paste', this.readOnlyPasteHandler, true);
+        container.addEventListener('cut', this.readOnlyCutHandler, true);
+    }
+
+    private removeReadOnlyInteractionGuards(container: HTMLElement | null) {
+        if (!container) return;
+        if (this.readOnlyKeydownHandler) {
+            container.removeEventListener('keydown', this.readOnlyKeydownHandler, true);
+            this.readOnlyKeydownHandler = null;
+        }
+        if (this.readOnlyPasteHandler) {
+            container.removeEventListener('paste', this.readOnlyPasteHandler, true);
+            this.readOnlyPasteHandler = null;
+        }
+        if (this.readOnlyCutHandler) {
+            container.removeEventListener('cut', this.readOnlyCutHandler, true);
+            this.readOnlyCutHandler = null;
+        }
+    }
+
     private disposeUniver() {
+        this.removeReadOnlyInteractionGuards(this.editorContainer?.nativeElement ?? null);
+
         if (this.univer) {
             try {
                 this.univer.dispose();

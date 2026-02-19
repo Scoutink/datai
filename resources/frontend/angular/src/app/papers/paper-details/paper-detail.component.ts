@@ -42,6 +42,7 @@ export class PaperDetailComponent extends BaseComponent implements OnInit {
     paperId: string;
     editorData: any;
     activeTabIndex: number = 0;
+    isViewOnlyMode: boolean = true;
 
     public categoryStore = inject(CategoryStore);
     public clientStore = inject(ClientStore);
@@ -65,6 +66,10 @@ export class PaperDetailComponent extends BaseComponent implements OnInit {
 
         this.sub$.sink = this.route.queryParams.subscribe(params => {
             const tab = params['tab'];
+            const mode = params['mode'];
+
+            this.isViewOnlyMode = mode !== 'edit';
+
             if (tab) {
                 this.switchToTab(tab);
             }

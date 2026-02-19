@@ -144,7 +144,7 @@ export class PaperListComponent extends BaseComponent implements OnInit, AfterVi
     }
 
     viewPaper(paper: any) {
-        this.router.navigate(['/papers', paper.id]);
+        this.router.navigate(['/papers', paper.id], { queryParams: { mode: 'view', tab: 'content' } });
     }
 
     deletePaper(paper: any) {
