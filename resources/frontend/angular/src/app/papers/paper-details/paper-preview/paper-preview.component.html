@@ -17,7 +17,7 @@
 
     <ng-container *ngIf="!isLoading">
       <div class="premium-native-view">
-        <app-paper-editor [data]="editorData" [readOnly]="true" [paperId]="paperId"
+        <app-paper-editor [data]="editorData" [readOnly]="true" [isPreview]="true" [paperId]="paperId"
           [mode]="paperInfo?.contentType === 'DOC' ? 'DOC' : 'SHEET'">
         </app-paper-editor>
       </div>
