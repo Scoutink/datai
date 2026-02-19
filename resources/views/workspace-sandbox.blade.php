@@ -184,19 +184,21 @@ async function loadContent(nodeId){
     const data = await req(`/workspace-sandbox/content/node/${nodeId}`);
     if (data.missing) { view.innerHTML = `<b>Linked content missing or no permission.</b>`; return; }
     if (data.type === 'document') {
-      const src = data.officeViewerUrl || data.downloadUrl || data.directUrl || null;
+      const src = data.officeEmbedUrl || data.officeViewerUrl || data.downloadUrl || data.directUrl || null;
       view.innerHTML = `<h4>${escapeHtml(data.title || 'Document')}</h4>
       <div class="mini">Created: ${escapeHtml(String(data.createdDate || ''))}</div>
       ${data.url ? `<div class="mini">Path: ${escapeHtml(data.url)}</div>` : ''}
       ${src ? `<iframe class="viewer" src="${src}"></iframe>` : '<div class="mini">No viewer source available.</div>'}
-      <div class="mini" style="margin-top:8px;">If iframe is blocked by auth/CSP, use links: ${data.officeViewerUrl ? `<a href="${data.officeViewerUrl}" target="_blank">office viewer</a>`:''} ${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>`:''}</div>`;
+      <div class="mini" style="margin-top:8px;">Fallback links: ${data.officeEmbedUrl ? `<a href="${data.officeEmbedUrl}" target="_blank">office embed</a>`:''} ${data.officeViewerUrl ? ` | <a href="${data.officeViewerUrl}" target="_blank">office source</a>`:''} ${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>`:''}</div>`;
       return;
     }
     if (data.type === 'paper') {
+      const html = data.html || '';
       view.innerHTML = `<h4>${escapeHtml(data.title || 'Paper')}</h4>
       <div class="mini">Type: ${escapeHtml(data.contentType || '')}</div>
       <div class="mini">Created: ${escapeHtml(String(data.createdDate || ''))}</div>
-      <pre>${escapeHtml(data.text || '(no text)')}</pre>`;
+      ${html ? `<div style="border:1px solid #d0dbef;border-radius:8px;padding:10px;background:#fff;overflow:auto;max-height:520px;">${html}</div>` : `<pre>${escapeHtml(data.text || '(no text)')}</pre>`}
+      ${data.appViewUrl ? `<div class="mini" style="margin-top:8px;">Need full Univer rendering? <a href="${data.appViewUrl}" target="_blank">Open Paper app view</a></div>` : ''}`;
       return;
     }
     view.innerHTML = `<div class="mini">${escapeHtml(data.title || 'Node selected')}</div>`;

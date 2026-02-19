@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -94,6 +95,9 @@ class WorkspaceSandboxController extends Controller
 
             $relativeUrl = ltrim((string)($doc->url ?? ''), '/');
             $directUrl = $relativeUrl ? url('/' . $relativeUrl) : null;
+            $token = $this->ensureDocumentToken($doc->id);
+            $officeViewerUrl = url('/api/document/' . $doc->id . '/officeviewer?token=' . urlencode($token) . '&isVersion=false');
+            $officeEmbedUrl = 'https://view.officeapps.live.com/op/embed.aspx?src=' . urlencode($officeViewerUrl);
 
             return response()->json([
                 'type' => 'document',
@@ -102,7 +106,8 @@ class WorkspaceSandboxController extends Controller
                 'createdDate' => $doc->createdDate,
                 'url' => $doc->url,
                 'directUrl' => $directUrl,
-                'officeViewerUrl' => url('/api/document/' . $doc->id . '/officeviewer'),
+                'officeViewerUrl' => $officeViewerUrl,
+                'officeEmbedUrl' => $officeEmbedUrl,
                 'downloadUrl' => url('/api/document/' . $doc->id . '/download/0'),
             ]);
         }
@@ -118,13 +123,17 @@ class WorkspaceSandboxController extends Controller
                 return response()->json(['type' => 'paper', 'missing' => true]);
             }
 
+            $paperHtml = DB::table('papers')->where('id', $paper->id)->value('contentHtmlSanitized');
+
             return response()->json([
                 'type' => 'paper',
                 'title' => $paper->name,
                 'description' => $paper->description,
                 'contentType' => $paper->contentType,
                 'createdDate' => $paper->createdDate,
+                'html' => $paperHtml,
                 'text' => mb_substr((string)($paper->contentText ?? ''), 0, 5000),
+                'appViewUrl' => url('/papers/' . $paper->id . '?tab=content&mode=view'),
             ]);
         }
 
@@ -343,6 +352,25 @@ class WorkspaceSandboxController extends Controller
             ->all();
 
         return $node;
+    }
+
+
+    private function ensureDocumentToken(string $documentId): string
+    {
+        $row = DB::table('documentTokens')->where('documentId', $documentId)->first();
+        if ($row && !empty($row->token)) {
+            return (string)$row->token;
+        }
+
+        $token = Uuid::uuid4()->toString();
+        DB::table('documentTokens')->insert([
+            'id' => Uuid::uuid4()->toString(),
+            'documentId' => $documentId,
+            'token' => $token,
+            'createdDate' => Carbon::now(),
+        ]);
+
+        return $token;
     }
 
     private function activeNode(string $id): ?object
