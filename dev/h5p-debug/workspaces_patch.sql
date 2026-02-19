@@ -1,4 +1,6 @@
--- Workspaces module schema patch
+-- Workspaces module schema patch (phpMyAdmin-safe)
+-- Fix for MySQL errno 150: enforce same charset/collation as existing UUID tables.
+
 CREATE TABLE `workspaceNodes` (
   `id` char(36) NOT NULL,
   `nodeType` varchar(40) NOT NULL,
@@ -22,7 +24,7 @@ CREATE TABLE `workspaceNodes` (
   CONSTRAINT `workspacenodes_createdby_fk` FOREIGN KEY (`createdBy`) REFERENCES `users` (`id`),
   CONSTRAINT `workspacenodes_parent_fk` FOREIGN KEY (`parentId`) REFERENCES `workspaceNodes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `workspacenodes_root_fk` FOREIGN KEY (`workspaceRootId`) REFERENCES `workspaceNodes` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `workspaceNodeFavorites` (
   `id` char(36) NOT NULL,
@@ -33,7 +35,7 @@ CREATE TABLE `workspaceNodeFavorites` (
   UNIQUE KEY `workspace_fav_unique` (`nodeId`,`userId`),
   CONSTRAINT `workspace_fav_node_fk` FOREIGN KEY (`nodeId`) REFERENCES `workspaceNodes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `workspace_fav_user_fk` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `workspaceNodeRecents` (
   `id` char(36) NOT NULL,
@@ -44,4 +46,4 @@ CREATE TABLE `workspaceNodeRecents` (
   UNIQUE KEY `workspace_recent_unique` (`nodeId`,`userId`),
   CONSTRAINT `workspace_recent_node_fk` FOREIGN KEY (`nodeId`) REFERENCES `workspaceNodes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `workspace_recent_user_fk` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
