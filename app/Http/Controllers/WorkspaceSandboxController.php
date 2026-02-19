@@ -92,13 +92,18 @@ class WorkspaceSandboxController extends Controller
                 return response()->json(['type' => 'document', 'missing' => true]);
             }
 
+            $relativeUrl = ltrim((string)($doc->url ?? ''), '/');
+            $directUrl = $relativeUrl ? url('/' . $relativeUrl) : null;
+
             return response()->json([
                 'type' => 'document',
                 'title' => $doc->name,
                 'description' => $doc->description,
                 'createdDate' => $doc->createdDate,
                 'url' => $doc->url,
+                'directUrl' => $directUrl,
                 'officeViewerUrl' => url('/api/document/' . $doc->id . '/officeviewer'),
+                'downloadUrl' => url('/api/document/' . $doc->id . '/download/0'),
             ]);
         }
 
