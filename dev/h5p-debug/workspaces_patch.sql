@@ -1,5 +1,9 @@
--- Workspaces module schema patch (phpMyAdmin-safe)
--- Fix for MySQL errno 150: enforce same charset/collation as existing UUID tables.
+-- Workspaces module schema patch (phpMyAdmin-safe, re-runnable)
+-- 1) If a prior run failed partially, this script resets workspace tables first.
+
+DROP TABLE IF EXISTS `workspaceNodeRecents`;
+DROP TABLE IF EXISTS `workspaceNodeFavorites`;
+DROP TABLE IF EXISTS `workspaceNodes`;
 
 CREATE TABLE `workspaceNodes` (
   `id` char(36) NOT NULL,
@@ -47,3 +51,8 @@ CREATE TABLE `workspaceNodeRecents` (
   CONSTRAINT `workspace_recent_node_fk` FOREIGN KEY (`nodeId`) REFERENCES `workspaceNodes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `workspace_recent_user_fk` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Verification (optional):
+-- SHOW CREATE TABLE workspaceNodes;
+-- SHOW CREATE TABLE workspaceNodeFavorites;
+-- SHOW CREATE TABLE workspaceNodeRecents;

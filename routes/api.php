@@ -48,6 +48,7 @@ use App\Http\Controllers\BoardController;
 use App\Http\Controllers\PaperController;
 use App\Http\Controllers\Api\InteractiveController;
 use App\Http\Controllers\WorkspaceController;
+use App\Http\Controllers\WorkspaceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -197,6 +198,25 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/emailSMTPSetting/{id}', [EmailSMTPSettingController::class, 'destroy']);
         Route::get('/emailSMTPSetting/{id}', [EmailSMTPSettingController::class, 'edit']);
     });
+
+    Route::middleware('hasToken:ALL_DOCUMENTS_VIEW_DOCUMENTS')->group(function () {
+        Route::get('/workspaces', [WorkspaceController::class, 'roots']);
+        Route::get('/workspaces/favorites', [WorkspaceController::class, 'favorites']);
+        Route::get('/workspaces/recents', [WorkspaceController::class, 'recents']);
+        Route::get('/workspaces/{id}/tree', [WorkspaceController::class, 'tree']);
+    });
+
+    Route::group(['middleware' => ['hasToken:ALL_DOCUMENTS_EDIT_DOCUMENT,ASSIGNED_DOCUMENTS_EDIT_DOCUMENT']], function () {
+        Route::post('/workspaces', [WorkspaceController::class, 'createRoot']);
+        Route::post('/workspaces/nodes', [WorkspaceController::class, 'addNode']);
+        Route::put('/workspaces/nodes/{id}/rename', [WorkspaceController::class, 'renameNode']);
+        Route::put('/workspaces/nodes/{id}/move', [WorkspaceController::class, 'moveNode']);
+        Route::delete('/workspaces/nodes/{id}', [WorkspaceController::class, 'deleteNode']);
+        Route::post('/workspaces/nodes/{id}/favorite', [WorkspaceController::class, 'toggleFavorite']);
+        Route::post('/workspaces/nodes/{id}/recent', [WorkspaceController::class, 'markRecent']);
+        Route::post('/workspaces/content-delete-cascade', [WorkspaceController::class, 'deleteContentCascade']);
+    });
+
 
     Route::get('/document/{id}/download/{isVersion}', [DocumentController::class, 'downloadDocument']);
     Route::get('/document/{id}/readText/{isVersion}', [DocumentController::class, 'readTextDocument']);
