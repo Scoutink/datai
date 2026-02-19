@@ -47,6 +47,7 @@ use App\Http\Controllers\WorkflowLogController;
 use App\Http\Controllers\BoardController;
 use App\Http\Controllers\PaperController;
 use App\Http\Controllers\Api\InteractiveController;
+use App\Http\Controllers\WorkspaceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -220,6 +221,20 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/document/assignedDocuments', [DocumentController::class, 'assignedDocuments']);
+
+    Route::get('/workspaces', [WorkspaceController::class, 'roots']);
+    Route::get('/workspaces/{id}/tree', [WorkspaceController::class, 'tree']);
+    Route::post('/workspaces', [WorkspaceController::class, 'createRoot']);
+    Route::post('/workspaces/nodes', [WorkspaceController::class, 'addNode']);
+    Route::put('/workspaces/nodes/{id}/move', [WorkspaceController::class, 'moveNode']);
+    Route::put('/workspaces/nodes/{id}/rename', [WorkspaceController::class, 'renameNode']);
+    Route::delete('/workspaces/nodes/{id}', [WorkspaceController::class, 'deleteNode']);
+    Route::post('/workspaces/content-delete-cascade', [WorkspaceController::class, 'deleteContentCascade']);
+    Route::get('/workspaces/favorites', [WorkspaceController::class, 'favorites']);
+    Route::post('/workspaces/nodes/{id}/favorite', [WorkspaceController::class, 'toggleFavorite']);
+    Route::post('/workspaces/nodes/{id}/recent', [WorkspaceController::class, 'markRecent']);
+    Route::get('/workspaces/recents', [WorkspaceController::class, 'recents']);
+
 
     Route::get('/document/{id}', [DocumentController::class, 'getDocumentbyId']);
 

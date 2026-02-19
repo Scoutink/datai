@@ -66,6 +66,15 @@ export const ROUTES: RouteInfo[] = [
     ],
   },
   {
+    path: 'workspaces',
+    title: 'WORKSPACES',
+    icon: 'folder',
+    class: '',
+    groupTitle: false,
+    claims: ['ALL_DOCUMENTS_VIEW_DOCUMENTS'],
+    submenu: [],
+  },
+  {
     path: 'documents/deep-search',
     title: 'DEEP_SEARCH',
     icon: 'zoom-in',

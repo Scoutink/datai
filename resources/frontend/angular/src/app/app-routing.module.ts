@@ -130,6 +130,14 @@ const routes: Routes = [
               ),
           },
           {
+            path: 'workspaces',
+            canLoad: [AuthGuard],
+            loadChildren: () =>
+              import('./workspaces/workspaces.module').then(
+                (m) => m.WorkspacesModule
+              ),
+          },
+          {
             path: 'document-audit-trails',
             canLoad: [AuthGuard],
             loadChildren: () =>
