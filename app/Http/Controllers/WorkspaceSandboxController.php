@@ -147,7 +147,7 @@ class WorkspaceSandboxController extends Controller
                 'text' => mb_substr((string)($paper->contentText ?? ''), 0, 5000),
                 'appViewUrl' => url('/papers/' . $paper->id . '?tab=content&mode=view'),
                 'appEmbedUrl' => url('/papers/' . $paper->id . '?tab=content&mode=view'),
-                'appManageUrl' => url('/papers/manage/' . $paper->id . '?workspaceSandbox=1'),
+                'paperUniverUrl' => url('/workspace-sandbox/content/node/' . $node->id . '/paper-univer'),
             ]);
         }
 
@@ -390,6 +390,32 @@ class WorkspaceSandboxController extends Controller
         $this->reindex($node->workspaceRootId, $node->parentId);
 
         return response()->json(['deleted' => $ids]);
+    }
+
+
+
+    public function paperUniverByNode(string $nodeId)
+    {
+        $node = $this->activeNode($nodeId);
+        if (!$node || $node->nodeType !== 'paper_link' || empty($node->contentRef)) {
+            abort(404, 'Paper node not found');
+        }
+
+        $paper = DB::table('papers')
+            ->where('id', $node->contentRef)
+            ->where('isDeleted', 0)
+            ->whereNull('deleted_at')
+            ->first(['id', 'name']);
+
+        if (!$paper) {
+            abort(404, 'Paper not found');
+        }
+
+        return view('workspace-sandbox-paper-univer', [
+            'paperId' => $paper->id,
+            'paperName' => $paper->name,
+            'manageUrl' => url('/papers/manage/' . $paper->id . '?workspaceSandbox=1'),
+        ]);
     }
 
     private function reindex(string $workspaceRootId, ?string $parentId): void

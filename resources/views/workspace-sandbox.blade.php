@@ -261,20 +261,19 @@ async function loadContent(nodeId){
     }
     if (data.type === 'paper') {
       view.classList.add('paper-focus');
-      const embed = data.appManageUrl || data.appEmbedUrl || data.appViewUrl || '';
+      const embed = data.paperUniverUrl || '';
       const html = data.html || '';
       const details = `
         <details class="paper-meta mini">
           <summary>Details</summary>
           <div>Type: ${escapeHtml(data.contentType || '')}</div>
           <div>Created: ${escapeHtml(String(data.createdDate || ''))}</div>
-          ${data.appManageUrl ? `<div style="margin-top:4px;">Clean editor source: <a href="${data.appManageUrl}" target="_blank">paper manage</a></div>` : ''}
-          ${data.appViewUrl ? `<div style="margin-top:4px;">Classic paper page: <a href="${data.appViewUrl}" target="_blank">paper details</a></div>` : ''}
+          ${data.paperUniverUrl ? `<div style="margin-top:4px;">Sandbox Univer source: <a href="${data.paperUniverUrl}" target="_blank">open clean viewer</a></div>` : ''}
         </details>`;
 
       view.innerHTML = `${embed ? `<div class="paper-stage"><iframe class="viewer" src="${embed}"></iframe></div>` : '<div class="mini" style="padding:10px;">No paper source available.</div>'}
-        ${details}
-        ${!embed && (html || data.text) ? `<div style="margin:10px;border:1px solid #d0dbef;border-radius:8px;padding:10px;background:#fff;overflow:auto;max-height:520px;">${html || `<pre>${escapeHtml(data.text || '(no text)')}</pre>`}</div>` : ''}`;
+        ${details}`;
+
       return;
     }
     view.innerHTML = `<div class="mini">${escapeHtml(data.title || 'Node selected')}</div>`;
