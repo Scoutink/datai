@@ -10,6 +10,37 @@
     @endif
 </div>
 
+
+@if(session('taskStatus'))
+<div class="panel">
+    <h3 class="{{ session('taskStatus.type') === 'success' ? 'text-success-500' : '' }}">{{ session('taskStatus.message') }}</h3>
+    @if(!empty(session('taskStatus.output')))
+    <pre style="text-align:left;white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;">{{ session('taskStatus.output') }}</pre>
+    @endif
+</div>
+@endif
+
+<div class="panel">
+    <h3>Plesk One-Click Maintenance</h3>
+    <p>If you don't use SSH, you can run required backend tasks from here.</p>
+
+    <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+        <form action="{{ url('update/tasks/migrate') }}" method="post" style="margin:0;">
+            {{ csrf_field() }}
+            <button class="button bg-primary-600" type="submit">Run Database Migration</button>
+        </form>
+
+        <form action="{{ url('update/tasks/clear-cache') }}" method="post" style="margin:0;">
+            {{ csrf_field() }}
+            <button class="button bg-primary-600" type="submit">Clear/Refresh Cache</button>
+        </form>
+    </div>
+
+    <p style="margin-top:15px;text-align:left;">
+        Frontend build (<code>npm run build</code>) still requires Node.js/Angular CLI installed on the server. If Plesk has Node enabled for this app, that build can be added as another button.
+    </p>
+</div>
+
 @if(!$isUpdateAvailable)
 <div class="panel">
     <h3 class="text-success-500">Great news! No update available at this time. Your system is up-to-date and running smoothly.</h3>
