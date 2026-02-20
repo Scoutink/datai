@@ -25,6 +25,10 @@
     .content-view.pdf-focus .pdf-stage { height:calc(100vh - 190px); min-height:760px; }
     .content-view.pdf-focus .viewer { width:100%; height:100%; min-height:760px; border:0; border-radius:0; background:#fff; display:block; }
     .content-view.pdf-focus .pdf-meta { padding:10px 12px; }
+    .content-view.office-focus { padding:0; border-style:solid; background:#f4f7fb; }
+    .content-view.office-focus .office-stage { height:calc(100vh - 190px); min-height:760px; }
+    .content-view.office-focus .viewer { width:100%; height:100%; min-height:760px; border:0; border-radius:0; background:#fff; display:block; }
+    .content-view.office-focus .office-meta { padding:10px 12px; }
     .modal-bg { position:fixed; inset:0; background:rgba(9,30,66,.45); display:none; align-items:center; justify-content:center; z-index:9999; }
     .modal { width: 520px; max-width: calc(100vw - 20px); background:#fff; border-radius:12px; padding:14px; }
     .row { display:flex; gap:8px; align-items:center; margin:8px 0; }
@@ -183,7 +187,7 @@ function renderSelected(){ document.getElementById('selected').textContent = sel
 
 async function loadContent(nodeId){
   const view = document.getElementById('contentView');
-  view.classList.remove('pdf-focus');
+  view.classList.remove('pdf-focus', 'office-focus');
   view.textContent = 'Loading content...';
   try {
     const data = await req(`/workspace-sandbox/content/node/${nodeId}`);
@@ -224,13 +228,21 @@ async function loadContent(nodeId){
         return;
       }
 
-      view.innerHTML = `<h4>${escapeHtml(data.title || 'Document')}</h4>
-      <div class="mini">Created: ${escapeHtml(String(data.createdDate || ''))}</div>
-      <div class="mini">Viewer mode: ${escapeHtml(data.viewerMode || 'office-embed')}</div>
-      ${data.url ? `<div class="mini">Path: ${escapeHtml(data.url)}</div>` : ''}
-      ${src ? `<iframe class="viewer" src="${src}"></iframe>` : '<div class="mini">No viewer source available.</div>'}
-      <div class="mini" style="margin-top:8px;">Viewer links: ${data.officeEmbedUrl ? `<a href="${data.officeEmbedUrl}" target="_blank">office embed</a>`:''} ${data.inlineViewerUrl ? ` | <a href="${data.inlineViewerUrl}" target="_blank">inline fallback</a>`:''} ${data.officeViewerUrl ? ` | <a href="${data.officeViewerUrl}" target="_blank">office source</a>`:''} ${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>`:''}</div>
-      <div id="docDiag" class="mini" style="margin-top:6px;">Checking viewer diagnostics...</div>`;
+      view.classList.add('office-focus');
+      const details = `
+        <details class="office-meta mini">
+          <summary>Details</summary>
+          <div>Created: ${escapeHtml(String(data.createdDate || ''))}</div>
+          <div>Path: ${escapeHtml(data.url || '')}</div>
+          <div>Viewer mode: ${escapeHtml(data.viewerMode || 'office-embed')}</div>
+          <div style="margin-top:4px;">Links: ${data.officeEmbedUrl ? `<a href="${data.officeEmbedUrl}" target="_blank">office embed</a>`:''}${data.officeViewerUrl ? ` | <a href="${data.officeViewerUrl}" target="_blank">office source</a>`:''}${data.inlineViewerUrl ? ` | <a href="${data.inlineViewerUrl}" target="_blank">inline fallback</a>`:''}${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>`:''}</div>
+          <div id="docDiag" style="margin-top:4px;">Checking viewer diagnostics...</div>
+        </details>`;
+
+      view.innerHTML = `${src
+        ? `<div class="office-stage"><iframe class="viewer" src="${src}"></iframe></div>`
+        : '<div class="mini" style="padding:10px;">No viewer source available.</div>'}
+        ${details}`;
       if (data.diagnosticsUrl) {
         req(data.diagnosticsUrl).then(diag => {
           const d = document.getElementById('docDiag');
