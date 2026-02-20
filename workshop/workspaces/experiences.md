@@ -73,3 +73,105 @@ This file captures practical lessons from implementing the backend-first Workspa
 - Add automated feature tests for workspace move/delete constraints.
 - Add response payload contract tests for content endpoints.
 - Normalize naming (`workkspaces_implimentation_plan.md` typo) when safe.
+
+## 11) Deep-dive findings: how the Paper "Edit" flow really works
+
+### 11.1 Route and UI flow
+- In Paper Details (`/papers/:id`), the **Edit** button calls `editPaper()` and navigates to `/papers/manage/:id`.
+- `/papers/manage/:id` loads `PaperManageComponent` (same component used for create and edit modes).
+
+### 11.2 Data hydration path
+- `PaperManageComponent` calls `PaperService.getPaper(id)` (`GET /api/papers/{id}`).
+- API returns the paper row including `contentType` (`DOC`/`SHEET`) and `contentJson`.
+- Component parses `contentJson` into `editorData` and passes it to `<app-paper-editor [data] ... [mode]>`.
+
+### 11.3 Univer construction sequence (critical)
+Inside `UnifiedEditorComponent`:
+1. Create `Univer` core instance.
+2. Register core plugins (network/render/drawing/formula).
+3. Register mode logic plugins:
+   - Docs plugin always,
+   - Sheets plugins when mode is `SHEET`.
+4. Create unit with `initialData` (the parsed `contentJson`) so real snapshot is mounted.
+5. Register UI plugins last (toolbar/header/footer on edit pages).
+
+This is why edit mode shows proper document formatting and multi-tab sheet structures.
+
+### 11.4 Why sandbox paper view currently looks wrong
+- Sandbox currently uses `appEmbedUrl = /papers/{id}?tab=content&mode=view` in an iframe.
+- That route renders the **entire Paper Details page shell** (sidebar/header/tabs/actions), not a clean Univer surface.
+- Therefore sandbox viewer gets clutter and nested platform chrome.
+
+### 11.5 Permission implications
+- Edit button visibility is claim-gated in UI.
+- Update API is claim-gated.
+- Read API (`GET /papers/{id}`) is auth-protected and used for hydration; sandbox should reuse this path (or equivalent server-side checked path) rather than raw table reads for production parity.
+
+## 12) Flawless implementation plan: Workspace paper content view parity (safe, isolated)
+
+### Phase A — Non-invasive architecture setup (no behavior breakage)
+1. **Keep existing paper iframe path as fallback only** (feature flag style in sandbox code path).
+2. Add new sandbox endpoint for paper payload:
+   - `GET /workspace-sandbox/content/paper/{paperId}/snapshot`
+   - Return only fields needed by viewer: `id`, `name`, `contentType`, `contentJson`, optional `contentHtmlSanitized` fallback.
+3. Ensure endpoint performs permission-aware access checks equivalent to current paper read path.
+4. Do not touch main Angular module routing/components in this phase.
+
+### Phase B — Clean sandbox viewer shell (no platform iframe)
+5. In sandbox page, replace paper iframe strategy with an isolated mount container:
+   - `<div id="paperUniverMount"></div>`
+   - dedicated loading/error states.
+6. Remove platform page embedding for papers from default rendering path.
+7. Keep existing "open full paper view" link only in collapsed details panel for debugging.
+
+### Phase C — Univer runtime integration (sandbox-only)
+8. Reuse the same Univer initialization sequence discovered in deep-dive:
+   - same plugin registration order,
+   - unit type chosen from `contentType`,
+   - unit initialized from `contentJson` snapshot.
+9. Start with **edit-equivalent successful rendering first** (goal: exact fidelity for DOC/SHEET structure and formatting).
+10. After rendering parity is proven, add a strict read-only guard layer:
+   - disable mutation commands,
+   - block keyboard edit shortcuts,
+   - block paste/cut,
+   - preserve navigation and copy.
+
+### Phase D — Toolbar cleanup + view-only mode (second step after parity)
+11. Introduce `paperViewMode` in sandbox renderer:
+   - `fidelity` mode (debug parity, near-edit chrome),
+   - `viewer` mode (clean toolbar/minimal chrome).
+12. Hide non-essential Univer UI elements in viewer mode only:
+   - save/format/edit actions,
+   - maintain sheet tabs/scroll/zoom/navigation.
+13. Ensure view-only mode cannot persist changes even if a plugin leaks an edit action.
+
+### Phase E — Robust fallbacks
+14. If `contentJson` is null/invalid:
+   - DOC fallback → `contentHtmlSanitized` render block,
+   - SHEET fallback → structured static grid fallback.
+15. Add explicit error taxonomy in UI:
+   - `permission_denied`, `missing_snapshot`, `invalid_snapshot`, `univer_init_failure`.
+
+### Phase F — Regression safety net (must pass before merge)
+16. Test matrix:
+   - DOC with rich formatting (bold/color/headers/lists),
+   - SHEET with multiple tabs, formulas, wide columns,
+   - very large paper payload,
+   - user with view-only claims,
+   - user lacking paper access.
+17. Verify no regressions in existing sandbox viewers:
+   - Office docs unchanged,
+   - PDF focus unchanged.
+18. Verify no main platform behavior change:
+   - `/papers/:id` and `/papers/manage/:id` untouched.
+
+### Phase G — Rollout strategy
+19. Deploy with runtime toggle (`paperRenderer=v2`) default ON in sandbox only.
+20. Keep old iframe renderer callable by query param for emergency rollback.
+21. Document outcomes and edge cases back into this file before any production integration.
+
+### Definition of done (strict)
+- Paper nodes in workspace sandbox open in a **clean, full-area Univer-based viewer** (not full platform iframe).
+- DOC and SHEET render with high fidelity matching edit-mode content structure.
+- Viewer is read-only and toolbar-clean in final mode.
+- No regressions to PDF/Office viewers and no changes to main platform UX/routes.
