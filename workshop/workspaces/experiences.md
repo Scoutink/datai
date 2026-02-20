@@ -175,3 +175,48 @@ This is why edit mode shows proper document formatting and multi-tab sheet struc
 - DOC and SHEET render with high fidelity matching edit-mode content structure.
 - Viewer is read-only and toolbar-clean in final mode.
 - No regressions to PDF/Office viewers and no changes to main platform UX/routes.
+
+
+## 13) Univer in Workspace Paper View — Implementation log (for later action-menu reuse)
+
+### Objective
+Render paper nodes in Workspace sandbox using the same Univer-backed content path as the Paper edit flow, but without embedding full platform chrome.
+
+### What was implemented
+1. Added a sandbox paper endpoint that resolves a paper node and serves a dedicated wrapper page:
+   - `/workspace-sandbox/content/node/{id}/paper-univer`
+2. Changed sandbox paper payload to return `paperUniverUrl` and use it as the only primary embed source.
+3. Wrapper page (`workspace-sandbox-paper-univer.blade.php`) loads manage route in same-origin iframe and applies shell-stripping CSS.
+4. Added repeated resize dispatch after shell stripping so Univer recalculates mount dimensions.
+5. Added payload diagnostics (`hasContentJson`, `contentJsonLength`) to distinguish missing data vs render/layout failures.
+
+### Errors observed and confirmed
+- **Error A: full platform iframe still visible**
+  - Cause: embedding `/papers/:id` or `/papers/manage/:id` directly without shell stripping.
+  - Fix: dedicated wrapper route + controlled CSS stripping.
+
+- **Error B: toolbar/tabs visible but body/grid blank**
+  - Cause: over-aggressive CSS with broad selectors and forced `height:100%` chains on internal wrappers destabilized Univer mount geometry.
+  - Fix: narrowed selectors to platform shell and metadata columns only; removed universal height forcing; restored expected editor baseline (`min-height:80vh` on manage editor body).
+
+- **Error C: uncertain whether missing data vs mount issue**
+  - Cause: no quick signal in payload for paper snapshot presence.
+  - Fix: added `hasContentJson` + `contentJsonLength` in paper response and surfaced in details panel.
+
+### Stable integration pattern (keep for action-menu implementation)
+- Do **not** try to mount full Angular route directly in workspace pane.
+- Use a dedicated same-origin wrapper route for paper-univer embedding.
+- Strip only host shell/chrome; never target generic selectors (`header`, generic `button`, generic card headers).
+- Avoid global internal size overrides for Univer wrappers.
+- After CSS changes inside iframe, dispatch resize events to reflow Univer.
+- Add payload diagnostics whenever mount/data ambiguity is possible.
+
+### View-mode hardening added
+- Hid top Univer toolbars in wrapper view mode.
+- Added read-only guard listeners (`keydown`, `beforeinput`, `paste`, `cut`, `drop`) in capture phase to block edits while preserving navigation/copy.
+- Keep this guard in wrapper layer so core paper editor implementation remains untouched.
+
+### Replication notes for future action-menu integration
+- Reuse the wrapper-route pattern and read-only guards.
+- Keep a fallback switch to legacy embed during rollout.
+- Validate with both `DOC` and `SHEET` papers (including multi-sheet tabs and formatted text docs).

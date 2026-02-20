@@ -69,6 +69,24 @@
         }
 
         html, body { background: #fff !important; }
+
+        /* View mode: hide Univer top editing toolbars */
+        .univer-workbench-container-header,
+        .univer-doc-ui-toolbar,
+        .univer-sheet-ui-toolbar {
+          display: none !important;
+        }
+
+        /* Reclaim space after hiding header toolbars */
+        .univer-workbench-container-content {
+          top: 0 !important;
+        }
+
+        /* View mode: remove create/new sheet affordances */
+        .univer-sheet-ui-footer .univer-icon-button[aria-label*="add" i],
+        .univer-sheet-ui-footer .univer-icon-button[title*="add" i] {
+          display: none !important;
+        }
       `;
       doc.head.appendChild(style);
     }
@@ -87,8 +105,46 @@
     }
   }
 
+
+  function installReadOnlyGuards() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) return;
+
+      const blockEdit = (event) => {
+        const key = (event.key || '').toLowerCase();
+        const ctrlOrMeta = event.ctrlKey || event.metaKey;
+        const allowCombo = ctrlOrMeta && (key === 'c' || key === 'a');
+        const allowNav = [
+          'arrowup','arrowdown','arrowleft','arrowright','pageup','pagedown','home','end','tab','escape'
+        ].includes(key);
+        if (allowCombo || allowNav) return;
+        const block = key === 'enter' || key === 'backspace' || key === 'delete' || key === ' ' || key.length === 1 ||
+          (ctrlOrMeta && ['v','x','z','y','b','i','u'].includes(key));
+        if (block) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      };
+
+      const blockMutatingInput = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
+
+      doc.addEventListener('keydown', blockEdit, true);
+      doc.addEventListener('beforeinput', blockMutatingInput, true);
+      doc.addEventListener('paste', blockMutatingInput, true);
+      doc.addEventListener('cut', blockMutatingInput, true);
+      doc.addEventListener('drop', blockMutatingInput, true);
+    } catch (e) {
+      // best-effort sandbox guards only
+    }
+  }
+
   frame.addEventListener('load', () => {
     installObserver();
+    installReadOnlyGuards();
     try { frame.contentWindow?.dispatchEvent(new Event('resize')); } catch (e) {}
     let attempts = 0;
     const timer = setInterval(() => {
