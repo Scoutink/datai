@@ -136,6 +136,7 @@ class WorkspaceSandboxController extends Controller
             }
 
             $paperHtml = DB::table('papers')->where('id', $paper->id)->value('contentHtmlSanitized');
+            $paperJson = DB::table('papers')->where('id', $paper->id)->value('contentJson');
 
             return response()->json([
                 'type' => 'paper',
@@ -148,6 +149,8 @@ class WorkspaceSandboxController extends Controller
                 'appViewUrl' => url('/papers/' . $paper->id . '?tab=content&mode=view'),
                 'appEmbedUrl' => url('/papers/' . $paper->id . '?tab=content&mode=view'),
                 'paperUniverUrl' => url('/workspace-sandbox/content/node/' . $node->id . '/paper-univer'),
+                'hasContentJson' => !empty($paperJson),
+                'contentJsonLength' => $paperJson ? strlen((string) $paperJson) : 0,
             ]);
         }
 

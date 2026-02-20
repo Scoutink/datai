@@ -208,6 +208,7 @@ async function loadContent(nodeId){
           <details class="pdf-meta mini">
             <summary>Details</summary>
             <div>Created: ${escapeHtml(String(data.createdDate || ''))}</div>
+          <div>Snapshot: ${data.hasContentJson ? 'present' : 'missing'} (bytes: ${escapeHtml(String(data.contentJsonLength || 0))})</div>
             <div>Path: ${escapeHtml(data.url || '')}</div>
             <div>Viewer mode: ${escapeHtml(data.viewerMode || 'pdf-inline')}</div>
             <div style="margin-top:4px;">Links: ${data.inlineViewerUrl ? `<a href="${data.inlineViewerUrl}" target="_blank">inline</a>` : ''}${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>` : ''}${data.officeViewerUrl ? ` | <a href="${data.officeViewerUrl}" target="_blank">office source</a>` : ''}</div>
@@ -237,6 +238,7 @@ async function loadContent(nodeId){
         <details class="office-meta mini">
           <summary>Details</summary>
           <div>Created: ${escapeHtml(String(data.createdDate || ''))}</div>
+          <div>Snapshot: ${data.hasContentJson ? 'present' : 'missing'} (bytes: ${escapeHtml(String(data.contentJsonLength || 0))})</div>
           <div>Path: ${escapeHtml(data.url || '')}</div>
           <div>Viewer mode: ${escapeHtml(data.viewerMode || 'office-embed')}</div>
           <div style="margin-top:4px;">Links: ${data.officeEmbedUrl ? `<a href="${data.officeEmbedUrl}" target="_blank">office embed</a>`:''}${data.officeViewerUrl ? ` | <a href="${data.officeViewerUrl}" target="_blank">office source</a>`:''}${data.inlineViewerUrl ? ` | <a href="${data.inlineViewerUrl}" target="_blank">inline fallback</a>`:''}${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>`:''}</div>
@@ -268,6 +270,7 @@ async function loadContent(nodeId){
           <summary>Details</summary>
           <div>Type: ${escapeHtml(data.contentType || '')}</div>
           <div>Created: ${escapeHtml(String(data.createdDate || ''))}</div>
+          <div>Snapshot: ${data.hasContentJson ? 'present' : 'missing'} (bytes: ${escapeHtml(String(data.contentJsonLength || 0))})</div>
           ${data.paperUniverUrl ? `<div style="margin-top:4px;">Sandbox Univer source: <a href="${data.paperUniverUrl}" target="_blank">open clean viewer</a></div>` : ''}
         </details>`;
 

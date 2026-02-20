@@ -24,7 +24,7 @@
       const style = doc.createElement('style');
       style.id = styleId;
       style.textContent = `
-        /* Remove only platform shell/chrome (not Univer internals) */
+        /* Remove only host platform shell/chrome */
         app-main-layout .sidebar,
         app-main-layout .navbar,
         .sidebar,
@@ -39,13 +39,13 @@
           display: none !important;
         }
 
-        /* Hide Paper manage metadata side panel + action buttons */
+        /* Hide Paper manage metadata panel + action bar only */
         .content-block > .row > .col-xl-3.col-lg-4.col-md-12.col-sm-12,
         .content-block > .row > .col-6.text-right {
           display: none !important;
         }
 
-        /* Expand editor column full width */
+        /* Expand only layout shell, do not override Univer internal sizing */
         .content-block > .row > .col-xl-9.col-lg-8.col-md-12.col-sm-12 {
           flex: 0 0 100% !important;
           max-width: 100% !important;
@@ -54,23 +54,21 @@
           margin: 0 !important;
         }
 
-        /* Keep only editor surface */
-        body, .content, .content-block, .content-block > .row,
-        app-paper-manage, app-paper-editor, app-unified-editor,
-        .unified-editor-container, .heavy-editor, .editor-mount-point,
+        .content, .content-block, .content-block > .row,
         .card.shadow-sm, .card.shadow-sm > .body.bg-white.p-4 {
           width: 100% !important;
           max-width: 100% !important;
-          height: 100% !important;
-          min-height: 100% !important;
           margin: 0 !important;
           box-sizing: border-box !important;
         }
 
         .card.shadow-sm { border: 0 !important; box-shadow: none !important; }
-        .card.shadow-sm > .body.bg-white.p-4 { padding: 0 !important; }
+        .card.shadow-sm > .body.bg-white.p-4 {
+          padding: 0 !important;
+          min-height: 80vh !important; /* preserve app expected editor mount height */
+        }
 
-        html, body { overflow: hidden !important; background: #fff !important; }
+        html, body { background: #fff !important; }
       `;
       doc.head.appendChild(style);
     }
