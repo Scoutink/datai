@@ -417,7 +417,7 @@ class WorkspaceSandboxController extends Controller
         return view('workspace-sandbox-paper-univer', [
             'paperId' => $paper->id,
             'paperName' => $paper->name,
-            'manageUrl' => url('/papers/manage/' . $paper->id . '?workspaceSandbox=1'),
+            'manageUrl' => url('/papers/' . $paper->id . '?tab=content&mode=view&workspaceSandbox=1'),
         ]);
     }
 

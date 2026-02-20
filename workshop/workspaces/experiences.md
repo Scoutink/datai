@@ -255,3 +255,9 @@ Files changed in the latest paper read-only update:
 - `resources/frontend/angular/src/app/papers/paper-manage/paper-manage.component.ts`
 - `resources/frontend/angular/src/app/papers/paper-manage/paper-manage.component.html`
 - `workshop/workspaces/experiences.md`
+
+
+## 16) Critical deployment finding: Angular TS changes require rebuild (why prior update looked unchanged)
+- A key reason “nothing changed” on server after prior updates: edits in Angular source (`resources/frontend/angular/src/...`) do not affect runtime until frontend build assets are regenerated and deployed.
+- Because the sandbox requirement was no-build validation, paper-view behavior must be implemented in server-rendered sandbox paths (`resources/views/*`, `WorkspaceSandboxController`, `routes/web.php`) to guarantee immediate effect after upload.
+- Follow-up fix applied: switched sandbox wrapper source to paper details content-view route (`/papers/{id}?tab=content&mode=view...`) and stripped host chrome there, so runtime uses the already-built preview/read-only path rather than relying on newly edited TS code.

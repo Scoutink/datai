@@ -12,9 +12,11 @@
 </head>
 <body>
 <iframe id="paperFrame" src="{{ $manageUrl }}" title="{{ $paperName }}"></iframe>
+<div id="diag" style="position:fixed;right:8px;bottom:8px;background:#111;color:#fff;font:12px Arial;padding:4px 8px;border-radius:6px;opacity:.75;z-index:9999">loading…</div>
 <script>
 (function () {
   const frame = document.getElementById('paperFrame');
+  const diag = document.getElementById('diag');
 
   function applyCleanView(doc) {
     if (!doc || !doc.head || !doc.body) return;
@@ -39,9 +41,22 @@
           display: none !important;
         }
 
-        /* Hide Paper manage metadata panel + action bar only */
+        /* Hide details/manage chrome around editor area */
         .content-block > .row > .col-xl-3.col-lg-4.col-md-12.col-sm-12,
         .content-block > .row > .col-6.text-right {
+          display: none !important;
+        }
+
+        .header-buttons,
+        mat-tab-header,
+        .mat-mdc-tab-header,
+        .mat-mdc-tab-label-container,
+        .card > .header,
+        .list-group,
+        app-paper-comments,
+        app-paper-versions,
+        app-paper-audit-trail,
+        app-paper-permissions {
           display: none !important;
         }
 
@@ -66,6 +81,16 @@
         .card.shadow-sm > .body.bg-white.p-4 {
           padding: 0 !important;
           min-height: 80vh !important; /* preserve app expected editor mount height */
+        }
+
+        .mat-mdc-tab-body-content,
+        .mat-mdc-tab-body-active,
+        app-paper-preview,
+        .premium-wrapper,
+        .content-container,
+        .premium-native-view {
+          height: 100% !important;
+          min-height: 80vh !important;
         }
 
         html, body { background: #fff !important; }
@@ -95,6 +120,7 @@
   function installObserver() {
     try {
       const doc = frame.contentDocument;
+      if (diag) diag.textContent = `src ok | ready=${doc?.readyState || "?"}`;
       if (!doc) return;
       applyCleanView(doc);
 
@@ -109,6 +135,7 @@
   function installReadOnlyGuards() {
     try {
       const doc = frame.contentDocument;
+      if (diag) diag.textContent = `src ok | ready=${doc?.readyState || "?"}`;
       if (!doc) return;
 
       const blockEdit = (event) => {
