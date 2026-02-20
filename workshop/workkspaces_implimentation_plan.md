@@ -89,3 +89,19 @@ Deliver a production-safe, complete Workspaces module matching the Workspace SSO
 - [ ] Phase B frontend implementation (without sidebar item).
 - [ ] Phase C inheritance/deletion wrappers.
 - [ ] Phase D sidebar activation.
+
+
+## 8) Sandbox Current Delivery Snapshot (Latest)
+- Standalone no-build route: `/workspace-sandbox`.
+- Node action modal per selected node (Document/Paper/Folder + Save/Delete + Rename/Move).
+- Collapsible tree panel between header and content view.
+- Content view same-page rendering:
+  - Documents: Office embed source + inline fallback + diagnostics endpoint.
+  - Papers: app-view iframe (`/papers/{id}?tab=content&mode=view`) + sanitized HTML/text fallback.
+- Dev diagnostics moved behind developer icon modal.
+
+### Next validation on Ubuntu server
+1. Open `/workspace-sandbox` and select a `document_link` node.
+2. Confirm diagnostics line reports source status/content-type.
+3. If Office iframe fails but inline fallback works, treat as Office-online reachability issue, not token flow issue.
+4. Select `paper_link` and verify app-view iframe loads in read-only mode.
