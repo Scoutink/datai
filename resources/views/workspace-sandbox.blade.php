@@ -184,11 +184,22 @@ async function loadContent(nodeId){
     const data = await req(`/workspace-sandbox/content/node/${nodeId}`);
     if (data.missing) { view.innerHTML = `<b>Linked content missing or no permission.</b>`; return; }
     if (data.type === 'document') {
-      const src = data.officeEmbedUrl || data.officeViewerUrl || data.inlineViewerUrl || data.downloadUrl || data.directUrl || null;
+      const isPdf = !!data.isPdf || String(data.fileExtension || '').toLowerCase() === 'pdf';
+      const src = isPdf
+        ? (data.inlineViewerUrl || data.downloadUrl || data.directUrl || null)
+        : (data.officeEmbedUrl || data.officeViewerUrl || data.inlineViewerUrl || data.downloadUrl || data.directUrl || null);
+      const viewerHtml = isPdf
+        ? (src
+          ? `<object data="${src}" type="application/pdf" class="viewer"><iframe class="viewer" src="${src}"></iframe></object>`
+          : '<div class="mini">No PDF source available.</div>')
+        : (src
+          ? `<iframe class="viewer" src="${src}"></iframe>`
+          : '<div class="mini">No viewer source available.</div>');
       view.innerHTML = `<h4>${escapeHtml(data.title || 'Document')}</h4>
       <div class="mini">Created: ${escapeHtml(String(data.createdDate || ''))}</div>
+      <div class="mini">Viewer mode: ${escapeHtml(data.viewerMode || (isPdf ? 'pdf-inline' : 'office-embed'))}</div>
       ${data.url ? `<div class="mini">Path: ${escapeHtml(data.url)}</div>` : ''}
-      ${src ? `<iframe class="viewer" src="${src}"></iframe>` : '<div class="mini">No viewer source available.</div>'}
+      ${viewerHtml}
       <div class="mini" style="margin-top:8px;">Viewer links: ${data.officeEmbedUrl ? `<a href="${data.officeEmbedUrl}" target="_blank">office embed</a>`:''} ${data.inlineViewerUrl ? ` | <a href="${data.inlineViewerUrl}" target="_blank">inline fallback</a>`:''} ${data.officeViewerUrl ? ` | <a href="${data.officeViewerUrl}" target="_blank">office source</a>`:''} ${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>`:''}</div>
       <div id="docDiag" class="mini" style="margin-top:6px;">Checking viewer diagnostics...</div>`;
       if (data.diagnosticsUrl) {

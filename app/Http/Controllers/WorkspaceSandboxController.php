@@ -100,6 +100,8 @@ class WorkspaceSandboxController extends Controller
 
             $relativeUrl = ltrim((string)($doc->url ?? ''), '/');
             $directUrl = $relativeUrl ? url('/' . $relativeUrl) : null;
+            $extension = strtolower((string) pathinfo((string) ($doc->url ?? ''), PATHINFO_EXTENSION));
+            $isPdf = $extension === 'pdf';
             $token = $this->ensureDocumentToken($doc->id);
             $officeViewerUrl = url('/api/document/' . $doc->id . '/officeviewer?token=' . urlencode($token) . '&isVersion=false');
             $officeEmbedUrl = 'https://view.officeapps.live.com/op/embed.aspx?src=' . urlencode($officeViewerUrl);
@@ -116,6 +118,9 @@ class WorkspaceSandboxController extends Controller
                 'downloadUrl' => url('/api/document/' . $doc->id . '/download/0'),
                 'inlineViewerUrl' => url('/workspace-sandbox/content/node/' . $node->id . '/document-inline'),
                 'diagnosticsUrl' => url('/workspace-sandbox/content/node/' . $node->id . '/document-diagnostics'),
+                'fileExtension' => $extension,
+                'isPdf' => $isPdf,
+                'viewerMode' => $isPdf ? 'pdf-inline' : 'office-embed',
             ]);
         }
 
