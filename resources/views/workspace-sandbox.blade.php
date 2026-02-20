@@ -184,21 +184,34 @@ async function loadContent(nodeId){
     const data = await req(`/workspace-sandbox/content/node/${nodeId}`);
     if (data.missing) { view.innerHTML = `<b>Linked content missing or no permission.</b>`; return; }
     if (data.type === 'document') {
-      const src = data.officeEmbedUrl || data.officeViewerUrl || data.downloadUrl || data.directUrl || null;
+      const src = data.officeEmbedUrl || data.officeViewerUrl || data.inlineViewerUrl || data.downloadUrl || data.directUrl || null;
       view.innerHTML = `<h4>${escapeHtml(data.title || 'Document')}</h4>
       <div class="mini">Created: ${escapeHtml(String(data.createdDate || ''))}</div>
       ${data.url ? `<div class="mini">Path: ${escapeHtml(data.url)}</div>` : ''}
       ${src ? `<iframe class="viewer" src="${src}"></iframe>` : '<div class="mini">No viewer source available.</div>'}
-      <div class="mini" style="margin-top:8px;">Fallback links: ${data.officeEmbedUrl ? `<a href="${data.officeEmbedUrl}" target="_blank">office embed</a>`:''} ${data.officeViewerUrl ? ` | <a href="${data.officeViewerUrl}" target="_blank">office source</a>`:''} ${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>`:''}</div>`;
+      <div class="mini" style="margin-top:8px;">Viewer links: ${data.officeEmbedUrl ? `<a href="${data.officeEmbedUrl}" target="_blank">office embed</a>`:''} ${data.inlineViewerUrl ? ` | <a href="${data.inlineViewerUrl}" target="_blank">inline fallback</a>`:''} ${data.officeViewerUrl ? ` | <a href="${data.officeViewerUrl}" target="_blank">office source</a>`:''} ${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>`:''}</div>
+      <div id="docDiag" class="mini" style="margin-top:6px;">Checking viewer diagnostics...</div>`;
+      if (data.diagnosticsUrl) {
+        req(data.diagnosticsUrl).then(diag => {
+          const d = document.getElementById('docDiag');
+          if (!d) return;
+          d.textContent = `Diagnostics → ok: ${diag.ok}, status: ${diag.status}, content-type: ${diag.contentType || 'n/a'}${diag.sample ? `, sample: ${diag.sample}` : ''}`;
+        }).catch(err => {
+          const d = document.getElementById('docDiag');
+          if (d) d.textContent = `Diagnostics failed: ${err.message}`;
+        });
+      }
       return;
     }
     if (data.type === 'paper') {
       const html = data.html || '';
+      const embed = data.appEmbedUrl || data.appViewUrl || '';
       view.innerHTML = `<h4>${escapeHtml(data.title || 'Paper')}</h4>
       <div class="mini">Type: ${escapeHtml(data.contentType || '')}</div>
       <div class="mini">Created: ${escapeHtml(String(data.createdDate || ''))}</div>
-      ${html ? `<div style="border:1px solid #d0dbef;border-radius:8px;padding:10px;background:#fff;overflow:auto;max-height:520px;">${html}</div>` : `<pre>${escapeHtml(data.text || '(no text)')}</pre>`}
-      ${data.appViewUrl ? `<div class="mini" style="margin-top:8px;">Need full Univer rendering? <a href="${data.appViewUrl}" target="_blank">Open Paper app view</a></div>` : ''}`;
+      ${embed ? `<iframe class="viewer" src="${embed}"></iframe>` : ''}
+      ${html ? `<div style="margin-top:8px;border:1px solid #d0dbef;border-radius:8px;padding:10px;background:#fff;overflow:auto;max-height:520px;">${html}</div>` : `<pre>${escapeHtml(data.text || '(no text)')}</pre>`}
+      ${data.appViewUrl ? `<div class="mini" style="margin-top:8px;">Open full Paper view: <a href="${data.appViewUrl}" target="_blank">Paper app view</a></div>` : ''}`;
       return;
     }
     view.innerHTML = `<div class="mini">${escapeHtml(data.title || 'Node selected')}</div>`;

@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\Contracts\DocumentTokenRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Ramsey\Uuid\Uuid;
 
 class WorkspaceSandboxController extends Controller
 {
+    public function __construct(private DocumentTokenRepositoryInterface $documentTokenRepository)
+    {
+    }
     public function index()
     {
         return view('workspace-sandbox');
@@ -109,6 +114,8 @@ class WorkspaceSandboxController extends Controller
                 'officeViewerUrl' => $officeViewerUrl,
                 'officeEmbedUrl' => $officeEmbedUrl,
                 'downloadUrl' => url('/api/document/' . $doc->id . '/download/0'),
+                'inlineViewerUrl' => url('/workspace-sandbox/content/node/' . $node->id . '/document-inline'),
+                'diagnosticsUrl' => url('/workspace-sandbox/content/node/' . $node->id . '/document-diagnostics'),
             ]);
         }
 
@@ -134,10 +141,80 @@ class WorkspaceSandboxController extends Controller
                 'html' => $paperHtml,
                 'text' => mb_substr((string)($paper->contentText ?? ''), 0, 5000),
                 'appViewUrl' => url('/papers/' . $paper->id . '?tab=content&mode=view'),
+                'appEmbedUrl' => url('/papers/' . $paper->id . '?tab=content&mode=view'),
             ]);
         }
 
         return response()->json(['type' => 'node', 'title' => $node->title, 'nodeType' => $node->nodeType]);
+    }
+
+
+    public function documentInlineByNode(string $nodeId)
+    {
+        $node = $this->activeNode($nodeId);
+        if (!$node || $node->nodeType !== 'document_link' || empty($node->contentRef)) {
+            return response()->json(['message' => 'Document node not found'], 404);
+        }
+
+        $doc = DB::table('documents')
+            ->where('id', $node->contentRef)
+            ->where('isDeleted', 0)
+            ->whereNull('deleted_at')
+            ->first(['id', 'name', 'url', 'location']);
+
+        if (!$doc || empty($doc->url)) {
+            return response()->json(['message' => 'Document file path missing'], 404);
+        }
+
+        $disk = $doc->location ?: 'local';
+        if (!Storage::disk($disk)->exists($doc->url)) {
+            return response()->json(['message' => 'File not found in storage'], 404);
+        }
+
+        $contents = Storage::disk($disk)->get($doc->url);
+        $mime = Storage::disk($disk)->mimeType($doc->url) ?: 'application/octet-stream';
+        $ext = pathinfo((string)$doc->url, PATHINFO_EXTENSION);
+        $filename = trim(($doc->name ?: 'document') . ($ext ? ('.' . $ext) : ''));
+
+        return response($contents)
+            ->header('Content-Type', $mime)
+            ->header('Content-Length', (string) strlen($contents))
+            ->header('Content-Disposition', 'inline; filename="' . str_replace('"', '', $filename) . '"');
+    }
+
+    public function diagnoseDocumentByNode(string $nodeId): JsonResponse
+    {
+        $node = $this->activeNode($nodeId);
+        if (!$node || $node->nodeType !== 'document_link' || empty($node->contentRef)) {
+            return response()->json(['message' => 'Document node not found'], 404);
+        }
+
+        $token = $this->ensureDocumentToken($node->contentRef);
+        $officeViewerUrl = url('/api/document/' . $node->contentRef . '/officeviewer?token=' . urlencode($token) . '&isVersion=false');
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(20)->withOptions(['verify' => false])->get($officeViewerUrl);
+            $contentType = $response->header('content-type');
+            $sample = '';
+            if (str_contains((string)$contentType, 'json') || str_contains((string)$contentType, 'text')) {
+                $sample = mb_substr((string)$response->body(), 0, 500);
+            }
+
+            return response()->json([
+                'ok' => $response->successful(),
+                'status' => $response->status(),
+                'contentType' => $contentType,
+                'sourceUrl' => $officeViewerUrl,
+                'sample' => $sample,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'ok' => false,
+                'status' => 0,
+                'sourceUrl' => $officeViewerUrl,
+                'sample' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function createRoot(Request $request): JsonResponse
@@ -357,20 +434,7 @@ class WorkspaceSandboxController extends Controller
 
     private function ensureDocumentToken(string $documentId): string
     {
-        $row = DB::table('documentTokens')->where('documentId', $documentId)->first();
-        if ($row && !empty($row->token)) {
-            return (string)$row->token;
-        }
-
-        $token = Uuid::uuid4()->toString();
-        DB::table('documentTokens')->insert([
-            'id' => Uuid::uuid4()->toString(),
-            'documentId' => $documentId,
-            'token' => $token,
-            'createdDate' => Carbon::now(),
-        ]);
-
-        return $token;
+        return $this->documentTokenRepository->getDocumentToken($documentId);
     }
 
     private function activeNode(string $id): ?object

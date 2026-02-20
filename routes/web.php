@@ -38,6 +38,8 @@ Route::get('/workspace-sandbox', [WorkspaceSandboxController::class, 'index']);
 Route::get('/workspace-sandbox/roots', [WorkspaceSandboxController::class, 'roots']);
 Route::get('/workspace-sandbox/tree/{id}', [WorkspaceSandboxController::class, 'tree']);
 Route::get('/workspace-sandbox/content/node/{id}', [WorkspaceSandboxController::class, 'contentByNode']);
+Route::get('/workspace-sandbox/content/node/{id}/document-diagnostics', [WorkspaceSandboxController::class, 'diagnoseDocumentByNode']);
+Route::get('/workspace-sandbox/content/node/{id}/document-inline', [WorkspaceSandboxController::class, 'documentInlineByNode']);
 Route::get('/workspace-sandbox/papers', [WorkspaceSandboxController::class, 'listPapers']);
 Route::get('/workspace-sandbox/documents', [WorkspaceSandboxController::class, 'listDocuments']);
 Route::post('/workspace-sandbox/roots', [WorkspaceSandboxController::class, 'createRoot']);
