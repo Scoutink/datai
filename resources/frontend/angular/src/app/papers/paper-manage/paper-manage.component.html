@@ -6,7 +6,7 @@
                     <div class="col-6">
                         <h4 class="page-title">{{(isEditMode ? 'EDIT_PAPER' : 'ADD_PAPER') | translate}}</h4>
                     </div>
-                    <div class="col-6 text-right">
+                    <div class="col-6 text-right" *ngIf="!isWorkspaceSandboxViewMode">
                         <button mat-raised-button color="primary" (click)="savePaper()" class="m-r-10">
                             <mat-icon>save</mat-icon> {{'SAVE' | translate}}
                         </button>
@@ -20,7 +20,7 @@
 
         <div class="row">
             <!-- Metadata Form Side Panel -->
-            <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12">
+            <div class="col-xl-3 col-lg-4 col-md-12 col-sm-12" *ngIf="!isWorkspaceSandboxViewMode">
                 <div class="card">
                     <div class="header">
                         <h2>{{'METADATA' | translate}}</h2>
@@ -98,13 +98,15 @@
             </div>
 
             <!-- Editor Area -->
-            <div class="col-xl-9 col-lg-8 col-md-12 col-sm-12">
+            <div class="col-xl-9 col-lg-8 col-md-12 col-sm-12" [class.col-xl-12]="isWorkspaceSandboxViewMode" [class.col-lg-12]="isWorkspaceSandboxViewMode">
                 <div class="card shadow-sm">
                     <div class="body bg-white p-4" style="min-height: 80vh;">
                         <!-- Unified Univer Editor (Docs/Sheets) -->
                         <app-paper-editor *ngIf="(!isEditMode || (isEditMode && editorData))" [data]="editorData"
                             [paperId]="paperId"
                             [mode]="paperForm.value.contentType === paperContentType.DOC ? 'DOC' : 'SHEET'"
+                            [readOnly]="isWorkspaceSandboxViewMode"
+                            [isPreview]="isWorkspaceSandboxViewMode"
                             (onChange)="onEditorChange($event)">
                         </app-paper-editor>
                     </div>

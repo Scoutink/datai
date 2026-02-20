@@ -26,6 +26,7 @@ export class PaperManageComponent extends BaseComponent implements OnInit {
     editorData: any;
     initialSheetData: any;
     paperContentType = PaperContentType;
+    isWorkspaceSandboxViewMode: boolean = false;
 
     public categoryStore = inject(CategoryStore);
     public clientStore = inject(ClientStore);
@@ -44,6 +45,7 @@ export class PaperManageComponent extends BaseComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        this.isWorkspaceSandboxViewMode = this.route.snapshot.queryParamMap.get('workspaceSandbox') === '1';
         this.paperId = this.route.snapshot.params['id'];
         if (this.paperId) {
             this.isEditMode = true;
@@ -82,6 +84,10 @@ export class PaperManageComponent extends BaseComponent implements OnInit {
     }
 
     async savePaper() {
+        if (this.isWorkspaceSandboxViewMode) {
+            return;
+        }
+
         if (this.paperForm.invalid) {
             this.paperForm.markAllAsTouched();
             return;

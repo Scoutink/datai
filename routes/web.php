@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AngularController;
 use App\Http\Controllers\BoardsViewController;
+use App\Http\Controllers\WorkspaceSandboxController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +30,24 @@ Route::prefix('boards')->middleware(['boards', 'boardsAuth:BOARDS_VIEW_BOARDS'])
     Route::get('/', [BoardsViewController::class, 'index'])->name('boards.index');
     Route::get('/{id}', [BoardsViewController::class, 'view'])->name('boards.view');
 });
+
+
+
+// Workspace sandbox (no-build mockup for backend validation)
+Route::get('/workspace-sandbox', [WorkspaceSandboxController::class, 'index']);
+Route::get('/workspace-sandbox/roots', [WorkspaceSandboxController::class, 'roots']);
+Route::get('/workspace-sandbox/tree/{id}', [WorkspaceSandboxController::class, 'tree']);
+Route::get('/workspace-sandbox/content/node/{id}', [WorkspaceSandboxController::class, 'contentByNode']);
+Route::get('/workspace-sandbox/content/node/{id}/document-diagnostics', [WorkspaceSandboxController::class, 'diagnoseDocumentByNode']);
+Route::get('/workspace-sandbox/content/node/{id}/document-inline', [WorkspaceSandboxController::class, 'documentInlineByNode']);
+Route::get('/workspace-sandbox/content/node/{id}/paper-univer', [WorkspaceSandboxController::class, 'paperUniverByNode']);
+Route::get('/workspace-sandbox/papers', [WorkspaceSandboxController::class, 'listPapers']);
+Route::get('/workspace-sandbox/documents', [WorkspaceSandboxController::class, 'listDocuments']);
+Route::post('/workspace-sandbox/roots', [WorkspaceSandboxController::class, 'createRoot']);
+Route::post('/workspace-sandbox/nodes', [WorkspaceSandboxController::class, 'addNode']);
+Route::post('/workspace-sandbox/nodes/{id}/rename', [WorkspaceSandboxController::class, 'renameNode']);
+Route::post('/workspace-sandbox/nodes/{id}/move', [WorkspaceSandboxController::class, 'moveNode']);
+Route::post('/workspace-sandbox/nodes/{id}/delete', [WorkspaceSandboxController::class, 'deleteNode']);
 
 // Angular SPA catch-all (excludes api, install, update, boards, and test)
 Route::any('/{any}', [AngularController::class, 'index'])
