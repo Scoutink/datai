@@ -21,6 +21,10 @@
     input, select, button, textarea { font: inherit; }
     input, select, textarea { border:1px solid #c3d0e8; border-radius:8px; padding:8px; }
     .content-view { min-height:560px; border:1px dashed #c9d5ea; border-radius:8px; padding:10px; background:#fafcff; }
+    .content-view.pdf-focus { padding:0; border-style:solid; background:#f4f7fb; }
+    .content-view.pdf-focus .pdf-stage { height:calc(100vh - 190px); min-height:760px; }
+    .content-view.pdf-focus .viewer { width:100%; height:100%; min-height:760px; border:0; border-radius:0; background:#fff; display:block; }
+    .content-view.pdf-focus .pdf-meta { padding:10px 12px; }
     .modal-bg { position:fixed; inset:0; background:rgba(9,30,66,.45); display:none; align-items:center; justify-content:center; z-index:9999; }
     .modal { width: 520px; max-width: calc(100vw - 20px); background:#fff; border-radius:12px; padding:14px; }
     .row { display:flex; gap:8px; align-items:center; margin:8px 0; }
@@ -179,6 +183,7 @@ function renderSelected(){ document.getElementById('selected').textContent = sel
 
 async function loadContent(nodeId){
   const view = document.getElementById('contentView');
+  view.classList.remove('pdf-focus');
   view.textContent = 'Loading content...';
   try {
     const data = await req(`/workspace-sandbox/content/node/${nodeId}`);
@@ -188,18 +193,42 @@ async function loadContent(nodeId){
       const src = isPdf
         ? (data.inlineViewerUrl || data.downloadUrl || data.directUrl || null)
         : (data.officeEmbedUrl || data.officeViewerUrl || data.inlineViewerUrl || data.downloadUrl || data.directUrl || null);
-      const viewerHtml = isPdf
-        ? (src
-          ? `<object data="${src}" type="application/pdf" class="viewer"><iframe class="viewer" src="${src}"></iframe></object>`
-          : '<div class="mini">No PDF source available.</div>')
-        : (src
-          ? `<iframe class="viewer" src="${src}"></iframe>`
-          : '<div class="mini">No viewer source available.</div>');
+
+      if (isPdf) {
+        view.classList.add('pdf-focus');
+        const details = `
+          <details class="pdf-meta mini">
+            <summary>Details</summary>
+            <div>Created: ${escapeHtml(String(data.createdDate || ''))}</div>
+            <div>Path: ${escapeHtml(data.url || '')}</div>
+            <div>Viewer mode: ${escapeHtml(data.viewerMode || 'pdf-inline')}</div>
+            <div style="margin-top:4px;">Links: ${data.inlineViewerUrl ? `<a href="${data.inlineViewerUrl}" target="_blank">inline</a>` : ''}${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>` : ''}${data.officeViewerUrl ? ` | <a href="${data.officeViewerUrl}" target="_blank">office source</a>` : ''}</div>
+            <div id="docDiag" style="margin-top:4px;">Checking viewer diagnostics...</div>
+          </details>`;
+
+        view.innerHTML = `${src
+          ? `<div class="pdf-stage"><object data="${src}#toolbar=1&navpanes=1&statusbar=1&view=FitH" type="application/pdf" class="viewer"><iframe class="viewer" src="${src}"></iframe></object></div>`
+          : '<div class="mini" style="padding:10px;">No PDF source available.</div>'}
+          ${details}`;
+
+        if (data.diagnosticsUrl) {
+          req(data.diagnosticsUrl).then(diag => {
+            const d = document.getElementById('docDiag');
+            if (!d) return;
+            d.textContent = `Diagnostics → ok: ${diag.ok}, status: ${diag.status}, content-type: ${diag.contentType || 'n/a'}${diag.sample ? `, sample: ${diag.sample}` : ''}`;
+          }).catch(err => {
+            const d = document.getElementById('docDiag');
+            if (d) d.textContent = `Diagnostics failed: ${err.message}`;
+          });
+        }
+        return;
+      }
+
       view.innerHTML = `<h4>${escapeHtml(data.title || 'Document')}</h4>
       <div class="mini">Created: ${escapeHtml(String(data.createdDate || ''))}</div>
-      <div class="mini">Viewer mode: ${escapeHtml(data.viewerMode || (isPdf ? 'pdf-inline' : 'office-embed'))}</div>
+      <div class="mini">Viewer mode: ${escapeHtml(data.viewerMode || 'office-embed')}</div>
       ${data.url ? `<div class="mini">Path: ${escapeHtml(data.url)}</div>` : ''}
-      ${viewerHtml}
+      ${src ? `<iframe class="viewer" src="${src}"></iframe>` : '<div class="mini">No viewer source available.</div>'}
       <div class="mini" style="margin-top:8px;">Viewer links: ${data.officeEmbedUrl ? `<a href="${data.officeEmbedUrl}" target="_blank">office embed</a>`:''} ${data.inlineViewerUrl ? ` | <a href="${data.inlineViewerUrl}" target="_blank">inline fallback</a>`:''} ${data.officeViewerUrl ? ` | <a href="${data.officeViewerUrl}" target="_blank">office source</a>`:''} ${data.downloadUrl ? ` | <a href="${data.downloadUrl}" target="_blank">download</a>`:''}</div>
       <div id="docDiag" class="mini" style="margin-top:6px;">Checking viewer diagnostics...</div>`;
       if (data.diagnosticsUrl) {
