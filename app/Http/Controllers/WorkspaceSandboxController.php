@@ -147,6 +147,7 @@ class WorkspaceSandboxController extends Controller
                 'text' => mb_substr((string)($paper->contentText ?? ''), 0, 5000),
                 'appViewUrl' => url('/papers/' . $paper->id . '?tab=content&mode=view'),
                 'appEmbedUrl' => url('/papers/' . $paper->id . '?tab=content&mode=view'),
+                'appManageUrl' => url('/papers/manage/' . $paper->id . '?workspaceSandbox=1'),
             ]);
         }
 

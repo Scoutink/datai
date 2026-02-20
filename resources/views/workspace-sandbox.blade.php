@@ -29,6 +29,10 @@
     .content-view.office-focus .office-stage { height:calc(100vh - 190px); min-height:760px; }
     .content-view.office-focus .viewer { width:100%; height:100%; min-height:760px; border:0; border-radius:0; background:#fff; display:block; }
     .content-view.office-focus .office-meta { padding:10px 12px; }
+    .content-view.paper-focus { padding:0; border-style:solid; background:#f4f7fb; }
+    .content-view.paper-focus .paper-stage { height:calc(100vh - 190px); min-height:760px; }
+    .content-view.paper-focus .viewer { width:100%; height:100%; min-height:760px; border:0; border-radius:0; background:#fff; display:block; }
+    .content-view.paper-focus .paper-meta { padding:10px 12px; }
     .modal-bg { position:fixed; inset:0; background:rgba(9,30,66,.45); display:none; align-items:center; justify-content:center; z-index:9999; }
     .modal { width: 520px; max-width: calc(100vw - 20px); background:#fff; border-radius:12px; padding:14px; }
     .row { display:flex; gap:8px; align-items:center; margin:8px 0; }
@@ -187,7 +191,7 @@ function renderSelected(){ document.getElementById('selected').textContent = sel
 
 async function loadContent(nodeId){
   const view = document.getElementById('contentView');
-  view.classList.remove('pdf-focus', 'office-focus');
+  view.classList.remove('pdf-focus', 'office-focus', 'paper-focus');
   view.textContent = 'Loading content...';
   try {
     const data = await req(`/workspace-sandbox/content/node/${nodeId}`);
@@ -256,14 +260,21 @@ async function loadContent(nodeId){
       return;
     }
     if (data.type === 'paper') {
+      view.classList.add('paper-focus');
+      const embed = data.appManageUrl || data.appEmbedUrl || data.appViewUrl || '';
       const html = data.html || '';
-      const embed = data.appEmbedUrl || data.appViewUrl || '';
-      view.innerHTML = `<h4>${escapeHtml(data.title || 'Paper')}</h4>
-      <div class="mini">Type: ${escapeHtml(data.contentType || '')}</div>
-      <div class="mini">Created: ${escapeHtml(String(data.createdDate || ''))}</div>
-      ${embed ? `<iframe class="viewer" src="${embed}"></iframe>` : ''}
-      ${html ? `<div style="margin-top:8px;border:1px solid #d0dbef;border-radius:8px;padding:10px;background:#fff;overflow:auto;max-height:520px;">${html}</div>` : `<pre>${escapeHtml(data.text || '(no text)')}</pre>`}
-      ${data.appViewUrl ? `<div class="mini" style="margin-top:8px;">Open full Paper view: <a href="${data.appViewUrl}" target="_blank">Paper app view</a></div>` : ''}`;
+      const details = `
+        <details class="paper-meta mini">
+          <summary>Details</summary>
+          <div>Type: ${escapeHtml(data.contentType || '')}</div>
+          <div>Created: ${escapeHtml(String(data.createdDate || ''))}</div>
+          ${data.appManageUrl ? `<div style="margin-top:4px;">Clean editor source: <a href="${data.appManageUrl}" target="_blank">paper manage</a></div>` : ''}
+          ${data.appViewUrl ? `<div style="margin-top:4px;">Classic paper page: <a href="${data.appViewUrl}" target="_blank">paper details</a></div>` : ''}
+        </details>`;
+
+      view.innerHTML = `${embed ? `<div class="paper-stage"><iframe class="viewer" src="${embed}"></iframe></div>` : '<div class="mini" style="padding:10px;">No paper source available.</div>'}
+        ${details}
+        ${!embed && (html || data.text) ? `<div style="margin:10px;border:1px solid #d0dbef;border-radius:8px;padding:10px;background:#fff;overflow:auto;max-height:520px;">${html || `<pre>${escapeHtml(data.text || '(no text)')}</pre>`}</div>` : ''}`;
       return;
     }
     view.innerHTML = `<div class="mini">${escapeHtml(data.title || 'Node selected')}</div>`;
