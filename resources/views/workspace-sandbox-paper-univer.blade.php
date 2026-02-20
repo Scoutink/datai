@@ -24,32 +24,53 @@
       const style = doc.createElement('style');
       style.id = styleId;
       style.textContent = `
-        /* Remove app shell/chrome */
-        app-main-layout .sidebar, .sidebar, .left-sidebar, .navbar, .topbar, .block-header,
-        mat-sidenav, mat-sidenav-container > mat-sidenav, app-navbar, app-sidebar, header,
-        .col-xl-3, .col-lg-4, .col-md-12 .card .header, button[color="primary"], button[color="warn"] {
+        /* Remove only platform shell/chrome (not Univer internals) */
+        app-main-layout .sidebar,
+        app-main-layout .navbar,
+        .sidebar,
+        .left-sidebar,
+        .navbar,
+        .topbar,
+        .block-header,
+        app-navbar,
+        app-sidebar,
+        mat-sidenav,
+        mat-sidenav-container > mat-sidenav {
           display: none !important;
         }
 
-        /* Force editor area to occupy full frame */
-        body, .content, .content-block, .row, .col-xl-9, .col-lg-8, .card, .card .body,
-        app-paper-manage, app-paper-editor, app-unified-editor, .unified-editor-container, .heavy-editor,
-        .editor-mount-point {
-          margin: 0 !important;
-          padding: 0 !important;
-          width: 100% !important;
-          max-width: 100% !important;
-          min-width: 100% !important;
-          height: 100% !important;
-          min-height: 100% !important;
-          box-sizing: border-box !important;
-          background: #fff !important;
+        /* Hide Paper manage metadata side panel + action buttons */
+        .content-block > .row > .col-xl-3.col-lg-4.col-md-12.col-sm-12,
+        .content-block > .row > .col-6.text-right {
+          display: none !important;
         }
 
-        .content-block > .row > [class*="col-"] { flex: 0 0 100% !important; max-width: 100% !important; }
-        .card { border: 0 !important; box-shadow: none !important; }
-        .card .body { min-height: 100% !important; }
-        body { overflow: hidden !important; }
+        /* Expand editor column full width */
+        .content-block > .row > .col-xl-9.col-lg-8.col-md-12.col-sm-12 {
+          flex: 0 0 100% !important;
+          max-width: 100% !important;
+          width: 100% !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        /* Keep only editor surface */
+        body, .content, .content-block, .content-block > .row,
+        app-paper-manage, app-paper-editor, app-unified-editor,
+        .unified-editor-container, .heavy-editor, .editor-mount-point,
+        .card.shadow-sm, .card.shadow-sm > .body.bg-white.p-4 {
+          width: 100% !important;
+          max-width: 100% !important;
+          height: 100% !important;
+          min-height: 100% !important;
+          margin: 0 !important;
+          box-sizing: border-box !important;
+        }
+
+        .card.shadow-sm { border: 0 !important; box-shadow: none !important; }
+        .card.shadow-sm > .body.bg-white.p-4 { padding: 0 !important; }
+
+        html, body { overflow: hidden !important; background: #fff !important; }
       `;
       doc.head.appendChild(style);
     }
@@ -70,11 +91,12 @@
 
   frame.addEventListener('load', () => {
     installObserver();
+    try { frame.contentWindow?.dispatchEvent(new Event('resize')); } catch (e) {}
     let attempts = 0;
     const timer = setInterval(() => {
       attempts++;
       try {
-        if (frame.contentDocument) applyCleanView(frame.contentDocument);
+        if (frame.contentDocument) { applyCleanView(frame.contentDocument); frame.contentWindow?.dispatchEvent(new Event('resize')); }
       } catch (e) {
         clearInterval(timer);
       }
