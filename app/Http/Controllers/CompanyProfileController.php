@@ -28,6 +28,18 @@ class CompanyProfileController extends Controller
         return response()->json($this->companyProfileRepository->updateCompanyProfile($request->all()));
     }
 
+    public function getLicenseStatus()
+    {
+        $companyProfile = $this->companyProfileRepository->getCompanyProfile();
+
+        $hasLicenseKey = !empty($companyProfile->licenseKey ?? null);
+        $hasPurchaseCode = !empty($companyProfile->purchaseCode ?? null);
+
+        return response()->json([
+            'isLicensed' => $hasLicenseKey && $hasPurchaseCode,
+        ]);
+    }
+
     public function updateStorage(Request $request)
     {
         return $this->companyProfileRepository->updateStorage($request->all());

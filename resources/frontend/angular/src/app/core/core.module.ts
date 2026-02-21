@@ -16,6 +16,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 import { ToastrService } from 'ngx-toastr';
 import { SecurityService } from './security/security.service';
 import { LicenseInitializerService } from '@mlglobtech/license-validator-docphp';
+import { LicenseStatusService } from './security/license-status.service';
 
 @NgModule({
   declarations: [CommonDialogComponent, CommonDialogCommentComponent],
@@ -38,7 +39,7 @@ import { LicenseInitializerService } from '@mlglobtech/license-validator-docphp'
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
-      deps: [LicenseInitializerService, ToastrService, SecurityService, JwtHelperService],
+      deps: [LicenseInitializerService, ToastrService, SecurityService, LicenseStatusService],
       multi: true,
     },
   ],

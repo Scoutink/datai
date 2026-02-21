@@ -71,6 +71,7 @@ Route::get('/user/getResetinfo/{id}', [UserController::class, 'getUserInfoForRes
 Route::post('user/recoverPassword', [UserController::class, 'resetPassword']);
 Route::get('document/{id}/officeviewer', [DocumentController::class, 'officeviewer']);
 Route::get('/companyprofile', [CompanyProfileController::class, 'getCompanyProfile']);
+Route::get('/license/status', [CompanyProfileController::class, 'getLicenseStatus']);
 Route::post('/companyprofile/activate_license', [CompanyProfileController::class, 'updateLicense']);
 
 
