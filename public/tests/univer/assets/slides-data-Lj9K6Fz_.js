@@ -1,1 +1,0 @@
-const e={id:"deck-1",title:"Sandbox Deck",pageSize:{width:960,height:540},body:{pages:{"slide-1":{id:"slide-1",pageType:0,zIndex:1,title:"First Slide",description:"",pageElements:{},pageBackgroundFill:{rgb:"rgb(255,255,255)"}}},pageOrder:["slide-1"]}};export{e as SLIDE_DATA};

@@ -1,1 +1,0 @@
-import{a as t}from"./chunk-EDFYBFRY.js";var s=class extends t{constructor(){super(...arguments),this.id="",this.createdBy="",this.categoryId="",this.location="",this.deletedBy="",this.clientId="",this.operation="",this.statusId="",this.documentId=""}};export{s as a};
