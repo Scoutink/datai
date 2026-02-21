@@ -1,9 +1,15 @@
 import { SecurityService } from './security.service';
 import { LicenseInitializerService } from '@mlglobtech/license-validator-docphp';
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '@environments/environment';
 
 export function initializeApp(licenseService: LicenseInitializerService, toastrService: ToastrService, securityService: SecurityService): () => Promise<void> {
   return () => new Promise<void>((resolve, reject) => {
+    if (!environment.production && environment.licenseBypassForDevelopment) {
+      console.warn('License validation is bypassed in development mode.');
+      return resolve();
+    }
+
     return licenseService.initialize().then((result) => {
       if (result == "success") {
         return resolve();

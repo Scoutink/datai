@@ -4,6 +4,7 @@
 
 export const environment = {
   production: false,
+  licenseBypassForDevelopment: true,
   apiUrl: 'http://localhost:8000/',
   tokenExpiredTimeInMin: 50,
   allowExtesions: [

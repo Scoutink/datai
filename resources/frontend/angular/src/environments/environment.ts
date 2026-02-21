@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  licenseBypassForDevelopment: false,
   apiUrl: '/',
   tokenExpiredTimeInMin: 50,
   allowExtesions: [
