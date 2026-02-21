@@ -1,0 +1,198 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "document-management": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": {
+              "base": "dist/document-management"
+            },
+            "index": "src/index.html",
+            "polyfills": [
+              "zone.js",
+              "@angular/localize/init"
+            ],
+            "tsConfig": "tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "moment",
+              "rfdc",
+              "dayjs",
+              "dayjs/plugin/localeData",
+              "dayjs/plugin/localizedFormat",
+              "dayjs/plugin/objectSupport",
+              "dayjs/plugin/utc",
+              "bezier-easing",
+              "@ckeditor/ckeditor5-build-classic",
+              "clone",
+              "core-js",
+              "raf",
+              "rgbcolor",
+              "webcola",
+              "dagre",
+              "crypto-js",
+              "jspreadsheet-ce",
+              "jsuites",
+              "react",
+              "react-dom",
+              "react/jsx-runtime",
+              "react-dom/client",
+              "@univerjs/core",
+              "@univerjs/docs",
+              "@univerjs/docs-ui",
+              "@univerjs/engine-formula",
+              "@univerjs/engine-render",
+              "@univerjs/sheets",
+              "@univerjs/sheets-ui",
+              "@univerjs/sheets-formula",
+              "@univerjs/sheets-formula-ui",
+              "@univerjs/ui",
+              "@univerjs/design",
+              "@univerjs/network",
+              "@univerjs/presets",
+              "@univerjs/preset-docs-core",
+              "@univerjs/preset-sheets-core",
+              "@univerjs/drawing",
+              "@univerjs/drawing-ui",
+              "@univerjs/docs-drawing",
+              "@univerjs/docs-drawing-ui",
+              "@univerjs/docs-hyper-link",
+              "@univerjs/docs-hyper-link-ui",
+              "@univerjs/sheets-drawing",
+              "@univerjs/sheets-drawing-ui",
+              "@univerjs/sheets-hyper-link",
+              "@univerjs/sheets-hyper-link-ui"
+            ],
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-extended-pdf-viewer/assets/",
+                "output": "/assets/"
+              }
+            ],
+            "styles": [
+              "node_modules/ngx-toastr/toastr.css",
+              "@angular/material/prebuilt-themes/indigo-pink.css",
+              "./node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/assets/scss/style.scss",
+              "src/assets/scss/theme.scss",
+              "src/styles.scss"
+            ],
+            "scripts": [],
+            "browser": "src/main.ts",
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "."
+              ]
+            }
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "16mb",
+                  "maximumError": "20mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "100kb",
+                  "maximumError": "150kb"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "outputPath": {
+                "base": "../../../public/assets/angular-v4"
+              },
+              "baseHref": "/assets/angular-v4/browser/"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "document-management:build:production"
+            },
+            "development": {
+              "buildTarget": "document-management:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "document-management:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ],
+    "analytics": false
+  }
+}

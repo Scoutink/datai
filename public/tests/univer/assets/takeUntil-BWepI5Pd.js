@@ -1,0 +1,1 @@
+import{g4 as n,ga as r,g5 as a,gx as c}from"./index-BI8deSNo.js";function p(e){return n(function(o,t){r(e).subscribe(a(t,function(){return t.complete()},c)),!t.closed&&o.subscribe(t)})}export{p as t};
